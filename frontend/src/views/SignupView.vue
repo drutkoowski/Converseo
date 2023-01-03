@@ -3,7 +3,7 @@
     class="bg-hero-pattern bg-repeat animate-ltr-linear-infinite flex h-screen"
   >
     <div class="m-auto w-30 h-50 w-4/12 h-6/6 rounded-2xl">
-      <CardHeader :msg="'Login'" />
+      <CardHeader :msg="'Sign up'" />
       <form action="">
         <div class="relative my-12 mx-5">
           <input
@@ -35,8 +35,8 @@
           <p
             class="cursor-pointer text-stone-300 hover:-translate-y-0.5 hover:scale-0.5 transition-all"
           >
-            <router-link :to="{ name: 'signup' }"
-              >Don't have an account?</router-link
+            <router-link :to="{ name: 'login' }"
+              >Already have an account?</router-link
             >
           </p>
         </div>
@@ -44,7 +44,7 @@
           <button
             class="w-full font-semibold block h-20 bg-gradient-to-br from-orange-200 to-red-600 cursor-pointer uppercase text-stone-50 text-lg rounded-md transition-all hover:-translate-y-0.5 hover:scale-0.5"
           >
-            Login
+            Join
           </button>
         </div>
       </form>
@@ -54,9 +54,8 @@
 
 <script>
 import CardHeader from "@/components/CardHeader.vue";
-
 export default {
-  name: "LoginView",
+  name: "SignupView",
   components: {
     CardHeader,
   },
