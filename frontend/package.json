@@ -9,8 +9,11 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@vee-validate/rules": "^4.7.3",
+    "@vuepic/vue-datepicker": "^3.6.4",
     "axios": "^1.2.2",
     "pinia": "^2.0.28",
+    "vee-validate": "^4.7.3",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },

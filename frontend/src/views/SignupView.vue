@@ -31,6 +31,26 @@
             >Password</label
           >
         </div>
+        <div class="relative my-12 mx-5 flex">
+          <div class="w-3/6">
+            <select
+              name=""
+              id=""
+              class="h-9 w-5/6 rounded-md text-center mt-0.5"
+            >
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div class="w-3/6">
+            <Datepicker
+              class="h-10"
+              :max-date="new Date()"
+              :year-picker="true"
+              :placeholder="'Birth Year'"
+            />
+          </div>
+        </div>
         <div class="relative mx-5 text-white flex">
           <p
             class="cursor-pointer text-stone-300 hover:-translate-y-0.5 hover:scale-0.5 transition-all"
@@ -41,11 +61,7 @@
           </p>
         </div>
         <div class="relative my-3 mx-5">
-          <button
-            class="w-full font-semibold block h-20 bg-gradient-to-br from-orange-200 to-red-600 cursor-pointer uppercase text-stone-50 text-lg rounded-md transition-all hover:-translate-y-0.5 hover:scale-0.5"
-          >
-            Join
-          </button>
+          <CardButton :text="'Join'" />
         </div>
       </form>
     </div>
@@ -54,10 +70,16 @@
 
 <script>
 import CardHeader from "@/components/CardHeader.vue";
+import CardButton from "@/components/CardButton.vue";
+import Datepicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+
 export default {
   name: "SignupView",
   components: {
+    CardButton,
     CardHeader,
+    Datepicker,
   },
 };
 </script>
