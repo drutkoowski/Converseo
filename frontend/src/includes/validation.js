@@ -19,12 +19,16 @@ export default {
     configure({
       generateMessage: (ctx) => {
         const messages = {
-          required: `The field ${ctx.field} is required.`,
-          email: `The field ${ctx.field} must be a valid email.`,
+          required: `${
+            ctx.field[0].toUpperCase() + ctx.field.slice(1)
+          } is required.`,
+          email: `${
+            ctx.field[0].toUpperCase() + ctx.field.slice(1)
+          } must be a valid email.`,
         };
         const message = messages[ctx.rule.name]
           ? messages[ctx.rule.name]
-          : `The field ${ctx.field} is invalid.`;
+          : `${ctx.field[0].toUpperCase() + ctx.field.slice(1)} is invalid.`;
         return message;
       },
       validateOnBlur: true,

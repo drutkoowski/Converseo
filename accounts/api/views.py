@@ -1,6 +1,6 @@
 from rest_framework import generics
 from accounts.api.serializers import RegistrationSerializer
-from accounts.models import UserProfile, Account
+from accounts.models import Account
 
 
 class UserCreateAPIView(generics.CreateAPIView):
@@ -12,4 +12,5 @@ class UserCreateAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         if serializer.is_valid():
             serializer.save()
+            return serializer.data
         # serializer.save(user=self.request.user)

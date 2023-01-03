@@ -55,14 +55,3 @@ class Account(AbstractBaseUser):
     def has_module_perms(self, add_label):
         return True
 
-
-class UserProfile(models.Model):
-
-    options = (('male', 'male'), ('female', 'female'))
-
-    user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='profile')
-    gender = models.CharField(max_length=6, choices=options)
-    date_of_birth = models.DateField()
-
-    def __str__(self):
-        return f"{self.user.username}"
