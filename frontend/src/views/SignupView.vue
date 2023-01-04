@@ -29,7 +29,7 @@
             >Email</label
           >
         </div>
-        <div class="relative my-12 mx-5">
+        <div class="relative mt-4 mx-5">
           <vee-field
             type="password"
             name="password"
@@ -41,14 +41,14 @@
             >Password</label
           >
         </div>
-        <div class="relative mx-5 mt-4 text-white flex">
+        <div class="relative mx-5 mt-1 text-white flex">
           <div class="flex h-4">
-            <ErrorMessage class="text-red-600" name="username" />
+            <ErrorMessage class="text-red-600 block" name="username" />
             <ErrorMessage class="text-red-600 ml-1" name="email" />
             <ErrorMessage class="text-red-600 ml-1" name="password" />
           </div>
         </div>
-        <div class="relative mx-5 mt-4 text-white flex">
+        <div class="relative mx-5 mt-9 text-white flex">
           <p
             class="cursor-pointer text-stone-300 hover:-translate-y-0.5 hover:scale-0.5 transition-all"
           >
@@ -89,16 +89,22 @@ export default {
   },
   methods: {
     async signUp(values) {
+      this.isError = false;
+      this.errorMsg = "";
       const username = values.username;
       const email = values.email;
       const password = values.password;
-      console.log(username, email, password);
       const data = await axios.post("user/create", {
         username: username,
         password: password,
         email: email,
       });
-      console.log(data);
+      if (data.status !== 200) {
+        this.isError = true;
+        this.errorMsg = "Something went wrong.";
+        return;
+      }
+      this.$router.push("/login");
     },
   },
 };

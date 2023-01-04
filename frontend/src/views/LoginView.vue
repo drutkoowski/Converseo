@@ -58,6 +58,10 @@
 <script>
 import CardHeader from "@/components/CardHeader.vue";
 import CardButton from "@/components/CardButton.vue";
+import useUserStore from "@/stores/user";
+import { mapState } from "pinia";
+
+import axios from "axios";
 
 export default {
   name: "LoginView",
@@ -75,9 +79,44 @@ export default {
       errorMsg: "",
     };
   },
+  computed: {
+    ...mapState(useUserStore, ["isAuthenticated", "access", "refresh"]),
+  },
   methods: {
-    login(values) {
-      console.log(values);
+    async login(values) {
+      const username = values.username;
+      const password = values.password;
+      this.isError = false;
+      this.errorMsg = "";
+      try {
+        const data = await axios.post(
+          "token/",
+          {
+            username: username,
+            password: password,
+          },
+          { withCredentials: true }
+        );
+        if (data.status !== 200) {
+          this.isError = true;
+          this.errorMsg = "User does not exist or credentials are invalid.";
+          return;
+        }
+        this.isError = false;
+        this.errorMsg = "";
+        const refresh = data.data.refresh;
+        const access = data.data.access;
+        useUserStore.isAuthenticated = true;
+        useUserStore.refresh = refresh;
+        useUserStore.access = access;
+        localStorage.setItem("isAuthenticated", JSON.stringify(true));
+        localStorage.setItem("accessToken", access);
+        localStorage.setItem("refreshToken", refresh);
+        this.$router.push("/");
+      } catch (error) {
+        this.isError = true;
+        this.errorMsg = "Something went wrong.";
+      }
     },
   },
 };
