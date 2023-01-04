@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.models import Account
+from accounts.models import Account, Post
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -25,3 +25,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         account = Account.objects.create_user(**validated_data)
         return account
+
+
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ("author",)
+
+    def create(self, validated_data):
+        post = Post.objects.create(**validated_data)
+        return post

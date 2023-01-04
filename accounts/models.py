@@ -38,7 +38,7 @@ class Account(AbstractBaseUser):
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now_add=True)
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email",]
+    REQUIRED_FIELDS = ["email", ]
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
@@ -55,3 +55,6 @@ class Account(AbstractBaseUser):
     def has_module_perms(self, add_label):
         return True
 
+
+class Post(models.Model):
+    author = models.CharField(max_length=30)

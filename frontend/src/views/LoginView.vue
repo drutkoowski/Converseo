@@ -62,6 +62,7 @@ import useUserStore from "@/stores/user";
 import { mapState } from "pinia";
 
 import axios from "axios";
+import tokenActions from "../includes/tokenActions";
 
 export default {
   name: "LoginView",
@@ -104,14 +105,7 @@ export default {
         }
         this.isError = false;
         this.errorMsg = "";
-        const refresh = data.data.refresh;
-        const access = data.data.access;
-        useUserStore.isAuthenticated = true;
-        useUserStore.refresh = refresh;
-        useUserStore.access = access;
-        localStorage.setItem("isAuthenticated", JSON.stringify(true));
-        localStorage.setItem("accessToken", access);
-        localStorage.setItem("refreshToken", refresh);
+        tokenActions.setToken(data.data.access, data.data.refresh);
         this.$router.push("/");
       } catch (error) {
         this.isError = true;

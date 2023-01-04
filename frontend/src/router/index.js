@@ -39,12 +39,14 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  console.log(useUserStore.isAuthenticated);
   if (!to.meta.requiresAuth) {
     next();
     return;
   }
-  if (useUserStore.isAuthenticated) {
+  if (
+    useUserStore.isAuthenticated ||
+    JSON.parse(localStorage.getItem("isAuthenticated"))
+  ) {
     const store = useUserStore();
     store.refreshToken();
     next();

@@ -3,4 +3,5 @@ from . import views
 
 urlpatterns = [
     path("user/create",  views.UserCreateAPIView.as_view(), name="user-create"),
+    path("posts", views.PostListCreateAPIView.as_view(), name='list-create-post')
 ]

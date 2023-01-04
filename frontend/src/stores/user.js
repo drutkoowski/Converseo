@@ -1,5 +1,7 @@
 import { defineStore } from "pinia";
+import router from "@/router";
 import axios from "axios";
+import tokenActions from "@/includes/tokenActions";
 
 export default defineStore("user", {
   state: () => ({
@@ -15,13 +17,15 @@ export default defineStore("user", {
       );
       const refresh = localStorage.getItem("refreshToken") || "";
       if (isAuthenticated) {
-        const response = await axios.post("token/refresh/", {
-          refresh: refresh,
-        });
-        localStorage.setItem("refreshToken", response.data.refresh);
-        localStorage.setItem("accessToken", response.data.access);
-        this.access = response.data.access;
-        this.response = response.data.refresh;
+        try {
+          const response = await axios.post("token/refresh/", {
+            refresh: refresh,
+          });
+          tokenActions.setToken(response.data.access, response.data.refresh);
+        } catch (error) {
+          tokenActions.resetToken();
+          router.push("login/");
+        }
       }
     },
   },
