@@ -66,11 +66,6 @@ class Account(AbstractBaseUser):
     def has_module_perms(self, add_label):
         return True
 
-    def get_avatar_path(self):
-        try:
-            return self.avatar.path
-        except:
-            return ""
 
 
 class Post(models.Model):

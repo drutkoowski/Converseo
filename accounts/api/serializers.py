@@ -30,17 +30,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class AccountSerializer(serializers.ModelSerializer):
-    photo_url = serializers.SerializerMethodField()
-
     class Meta:
         model = Account
-        fields = ("email", "id", "username", "photo_url")
-
-    def get_photo_url(self, obj):
-        request = self.context.get('request')
-        user = Account.objects.get(pk=request.user.pk)
-        photo_url = user.get_avatar_path()
-        return photo_url
+        fields = ("email", "id", "username", "avatar")
 
 
 class PostSerializer(serializers.ModelSerializer):

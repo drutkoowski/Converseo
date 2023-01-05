@@ -2,7 +2,7 @@
   <nav class="w-100 flex py-10 px-10">
     <img
       class="h-20 w-20 rounded-2xl outline-pink-500 outline outline-offset-2 align-text-bottom transition-all hover:-translate-y-0.5 hover:scale-105"
-      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6sGddmMZFZCqb7aJFx5eV-8FGj2gJWz7abGntj8IuyYdAv7W2HEJyi5WY3xbpLLzf-Zg&usqp=CAU"
+      :src="avatarPath"
       alt="User Image"
     />
     <p
@@ -27,7 +27,7 @@ import { mapActions, mapState } from "pinia";
 export default {
   name: "Navbar",
   computed: {
-    ...mapState(useUserStore, ["username"]),
+    ...mapState(useUserStore, ["username", "avatarPath"]),
     ...mapActions(useUserStore, ["signOut"]),
   },
 };

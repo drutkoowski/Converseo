@@ -2,18 +2,22 @@
   <div
     class="flex flex-col justify-center mt-48 transition-all items-center"
     :class="[!isSearching ? 'bounce-light' : '']"
-    @click.prevent="toggleSearch"
   >
     <div
       v-if="isTalkerFound"
       class="h-40 w-40 bg-red-600 rounded-full flex justify-center items-center cursor-pointer transition-all hover:scale-105 bounce-light"
     >
-      <img :src="talkerAvatarPath" alt="Avatar" width="5em" height="5em" />
+      <img
+        :src="talkerAvatarPath"
+        alt="Avatar"
+        class="h-100 w-100 rounded-full outline outline-offset-2 align-text-bottom transition-all hover:-translate-y-0.5 hover:scale-105"
+      />
     </div>
     <div
-      v-if="!isTalkerFound"
+      v-else
       class="h-40 w-40 bg-red-600 rounded-full flex justify-center items-center cursor-pointer transition-all hover:scale-105"
       :class="[isSearching ? 'animation-pulse' : '']"
+      @click.prevent="toggleSearch"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -73,6 +77,9 @@ export default {
   methods: {
     async toggleSearch() {
       this.isSearching = !this.isSearching;
+      this.isTalkerFound = false;
+      this.talkerUsername = "";
+      this.talkerAvatarPath = "";
       this.lowerSearchMsg = this.isSearching
         ? "Searching..."
         : "Search Converseo";
@@ -88,7 +95,7 @@ export default {
             this.isTalkerFound = true;
             this.isSearching = false;
             this.talkerUsername = res.data.username;
-            // this.talkerAvatarPath = res.data.avatar;
+            this.talkerAvatarPath = res.data.avatar;
             this.lowerSearchMsg = "You Found Someone!";
             clearInterval(i);
           }
@@ -99,7 +106,9 @@ export default {
         }, 10000);
       } else {
         this.isTalkerFound = false;
+        this.isSearching = false;
         this.talkerUsername = "";
+        this.talkerAvatarPath = "";
         this.lowerSearchMsg = "Search Converseo";
         await axios.delete("queue/delete");
       }
