@@ -1,17 +1,19 @@
 import axios from "axios";
 import tokenActions from "@/includes/tokenActions";
+import router from "../router";
+
 // response interceptor
 const axiosConfigResponse = axios.interceptors.response.use(
   function (response) {
-    if (response.status !== 200) {
+    if (response.status !== 200 && response.status !== 201) {
       tokenActions.resetToken();
-      this.$router.push("login/");
+      router.push("login/");
     }
     return response;
   },
   (error) => {
     tokenActions.resetToken();
-    this.$router.push("login/");
+    router.push("login/");
     return Promise.reject(error.message);
   }
 );

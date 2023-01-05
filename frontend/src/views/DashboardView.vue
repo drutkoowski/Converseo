@@ -1,19 +1,30 @@
 <template>
-  <h1>WITAM W DASHBOARDZIE</h1>
-  <router-link :to="{ name: 'test' }">go to test</router-link>
-  <p v-for="post in posts" :key="post.author">Author: {{ post.author }}</p>
-  <input type="text" placeholder="add post" v-model="author" />
-  <button @click.prevent="addPost">add post</button>
-  <button @click="logOut">logout</button>
+  <div class="bg-gradient-to-r from-gray-700 to-gray-900 min-h-screen">
+    <Navbar />
+    <!--    <h1>WITAM W DASHBOARDZIE</h1>-->
+    <!--    <router-link :to="{ name: 'test' }">go to test</router-link>-->
+    <!--    <p v-for="post in posts" :key="post.author">Author: {{ post.author }}</p>-->
+    <!--    <input type="text" placeholder="add post" v-model="author" />-->
+    <!--    <button @click.prevent="addPost">add post</button>-->
+    <!--    <button @click="logOut">logout</button>-->
+    <SearchButton />
+  </div>
 </template>
 
 <script>
 import useUserStore from "@/stores/user";
 import { mapState } from "pinia/dist/pinia";
 import axios from "axios";
+import tokenActions from "../includes/tokenActions";
+import Navbar from "@/components/Navbar.vue";
+import SearchButton from "@/components/SearchButton.vue";
 
 export default {
   name: "DashboardView",
+  components: {
+    Navbar,
+    SearchButton,
+  },
   data() {
     return {
       posts: [],
@@ -29,12 +40,7 @@ export default {
   },
   methods: {
     logOut() {
-      localStorage.setItem("isAuthenticated", JSON.stringify(false));
-      localStorage.setItem("accessToken", "");
-      localStorage.setItem("refreshToken", "");
-      useUserStore.isAuthenticated = false;
-      useUserStore.access = "";
-      useUserStore.refresh = "";
+      tokenActions.resetToken();
       this.$router.push("login/");
     },
     async addPost() {
@@ -46,3 +52,5 @@ export default {
   },
 };
 </script>
+
+<style scoped></style>

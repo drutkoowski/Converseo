@@ -1,7 +1,11 @@
-<template><router-link :to="{ name: 'dashboard' }">MAIN</router-link></template>
+<template>
+  <router-link :to="{ name: 'dashboard' }">MAIN</router-link>
+</template>
 
 <script>
 export default {
   name: "TestView",
 };
 </script>
+
+<style scoped></style>
