@@ -28,5 +28,9 @@ export default defineStore("user", {
         }
       }
     },
+    signOut() {
+      tokenActions.resetToken();
+      router.push("login/");
+    },
   },
 });

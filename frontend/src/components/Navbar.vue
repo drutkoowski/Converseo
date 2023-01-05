@@ -11,6 +11,7 @@
       Username
     </p>
     <p
+      @click.prevent="signOut"
       class="ml-auto mt-4 text-transparent bg-clip-text bg-gradient-to-br from-orange-200 to-red-600 cursor-pointer text-3xl underline underline-offset-8 underline decoration-orange-500/[.33] decoration-1 transition-all hover:-translate-y-0.5 hover:scale-105"
     >
       Logout
@@ -19,7 +20,14 @@
 </template>
 
 <script>
+import useUserStore from "@/stores/user";
 export default {
   name: "Navbar",
+  methods: {
+    signOut() {
+      const store = useUserStore();
+      store.signOut();
+    },
+  },
 };
 </script>

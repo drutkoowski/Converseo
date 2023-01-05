@@ -15,7 +15,6 @@
 import useUserStore from "@/stores/user";
 import { mapState } from "pinia/dist/pinia";
 import axios from "axios";
-import tokenActions from "../includes/tokenActions";
 import Navbar from "@/components/Navbar.vue";
 import SearchButton from "@/components/SearchButton.vue";
 
@@ -39,10 +38,6 @@ export default {
     ...mapState(useUserStore, ["isAuthenticated", "access", "refresh"]),
   },
   methods: {
-    logOut() {
-      tokenActions.resetToken();
-      this.$router.push("login/");
-    },
     async addPost() {
       const response = await axios.post("posts", {
         author: this.author,
