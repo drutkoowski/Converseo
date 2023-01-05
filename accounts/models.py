@@ -1,5 +1,15 @@
+from datetime import datetime, timedelta
+
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db import models
+
+
+def get_current_date():
+    return datetime.today()
+
+
+def get_expire_date():
+    return datetime.today() + timedelta(minutes=1)
 
 
 # Create your models here.
@@ -58,3 +68,9 @@ class Account(AbstractBaseUser):
 
 class Post(models.Model):
     author = models.CharField(max_length=30)
+
+
+class SearchQueue(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=get_current_date)
+    expires_at = models.DateTimeField(default=get_expire_date)

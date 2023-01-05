@@ -5,7 +5,7 @@ import router from "../router";
 // response interceptor
 const axiosConfigResponse = axios.interceptors.response.use(
   function (response) {
-    if (response.status !== 200 && response.status !== 201) {
+    if (response.status === 401) {
       tokenActions.resetToken();
       router.push("login/");
     }

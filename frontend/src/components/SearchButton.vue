@@ -47,6 +47,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: "SearchButton",
   data() {
@@ -56,11 +58,21 @@ export default {
     };
   },
   methods: {
-    toggleSearch() {
+    async toggleSearch() {
       this.isSearching = !this.isSearching;
       this.lowerSearchMsg = this.isSearching
         ? "Searching..."
         : "Search Converseo";
+      let response;
+      if (this.isSearching) {
+        response = await axios.post("queue/create");
+        // setInterval(() => {
+        //   console.log("e");
+        // }, 1000);
+      } else {
+        response = await axios.delete("queue/delete");
+      }
+      console.log(response);
     },
   },
 };
