@@ -8,6 +8,8 @@ export default defineStore("user", {
     access: localStorage.getItem("accessToken") || "",
     refresh: localStorage.getItem("refreshToken") || "",
     username: "",
+    avatarPath:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6sGddmMZFZCqb7aJFx5eV-8FGj2gJWz7abGntj8IuyYdAv7W2HEJyi5WY3xbpLLzf-Zg&usqp=CAU",
     isAuthenticated:
       JSON.parse(localStorage.getItem("isAuthenticated")) || false,
   }),

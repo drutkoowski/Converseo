@@ -73,7 +73,7 @@ class RandomizeQueuedAPIView(APIView):
     def get(self, request):
         queue = SearchQueue.objects.exclude(Q(user=request.user) | Q(expires_at__lte=Now())).first()
         if queue is not None:
-            serializer = AccountSerializer(queue.user)
+            serializer = AccountSerializer(queue.user, context={"request": request})
             return Response(status=status.HTTP_200_OK, data=serializer.data)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -84,7 +84,7 @@ class GetCurrentUserAPIView(APIView):
     def get(self, request):
         user = Account.objects.filter(pk=request.user.pk).first()
         if user is not None:
-            serializer = AccountSerializer(user)
+            serializer = AccountSerializer(user, context={"request": request})
             return Response(status=status.HTTP_200_OK, data=serializer.data)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)

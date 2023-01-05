@@ -7,7 +7,6 @@
 
 <script>
 import useUserStore from "@/stores/user";
-import { mapState } from "pinia/dist/pinia";
 import Navbar from "@/components/Navbar.vue";
 import SearchButton from "@/components/SearchButton.vue";
 import axios from "axios";
@@ -17,12 +16,6 @@ export default {
   components: {
     Navbar,
     SearchButton,
-  },
-  data() {
-    return {};
-  },
-  computed: {
-    ...mapState(useUserStore, ["isAuthenticated", "access", "refresh"]),
   },
   async created() {
     const userStore = useUserStore();

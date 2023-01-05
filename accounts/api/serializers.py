@@ -1,6 +1,4 @@
 from rest_framework import serializers
-from rest_framework.fields import CurrentUserDefault
-
 from accounts.models import Account, Post, SearchQueue
 
 
@@ -32,9 +30,17 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class AccountSerializer(serializers.ModelSerializer):
+    photo_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Account
-        fields = ("email", "id", "username",)
+        fields = ("email", "id", "username", "photo_url")
+
+    def get_photo_url(self, obj):
+        request = self.context.get('request')
+        user = Account.objects.get(pk=request.user.pk)
+        photo_url = user.get_avatar_path()
+        return photo_url
 
 
 class PostSerializer(serializers.ModelSerializer):

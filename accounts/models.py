@@ -44,6 +44,7 @@ class MyAccountManager(BaseUserManager):
 class Account(AbstractBaseUser):
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=105, unique=True)
+    avatar = models.ImageField(upload_to='avatars', blank=True, null=True, default="default_avatar.png")
     # required
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now_add=True)
@@ -64,6 +65,12 @@ class Account(AbstractBaseUser):
 
     def has_module_perms(self, add_label):
         return True
+
+    def get_avatar_path(self):
+        try:
+            return self.avatar.path
+        except:
+            return ""
 
 
 class Post(models.Model):

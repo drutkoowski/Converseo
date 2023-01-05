@@ -32,7 +32,7 @@ def signup_user():
     print('output', req.text)
 
 
-signup_user()
+# signup_user()
 
 if __name__ == '__main__':
     pass

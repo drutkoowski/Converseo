@@ -6,6 +6,7 @@
       alt="User Image"
     />
     <p
+      v-if="username"
       class="ml-5 mt-4 text-transparent bg-clip-text bg-gradient-to-br from-orange-200 to-red-600 cursor-pointer text-3xl underline underline-offset-8 underline decoration-orange-500/[.33] decoration-1 transition-all hover:-translate-y-0.5 hover:scale-105"
     >
       {{ username }}

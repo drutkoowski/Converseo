@@ -5,6 +5,13 @@
     @click.prevent="toggleSearch"
   >
     <div
+      v-if="isTalkerFound"
+      class="h-40 w-40 bg-red-600 rounded-full flex justify-center items-center cursor-pointer transition-all hover:scale-105 bounce-light"
+    >
+      <img :src="talkerAvatarPath" alt="Avatar" width="5em" height="5em" />
+    </div>
+    <div
+      v-if="!isTalkerFound"
       class="h-40 w-40 bg-red-600 rounded-full flex justify-center items-center cursor-pointer transition-all hover:scale-105"
       :class="[isSearching ? 'animation-pulse' : '']"
     >
@@ -59,6 +66,7 @@ export default {
       isSearching: false,
       isTalkerFound: false,
       talkerUsername: "",
+      talkerAvatarPath: "",
       lowerSearchMsg: "Search Converseo",
     };
   },
@@ -74,22 +82,19 @@ export default {
           if (!this.isSearching) {
             clearInterval(i);
           }
-          // jesli dostaniesz goscia to usun interval
           const res = await axios.get("queue/get-talker");
           if (res.status === 200) {
-            console.log("FOUND", res.data.username);
+            console.log("FOUND", res);
             this.isTalkerFound = true;
             this.isSearching = false;
             this.talkerUsername = res.data.username;
+            // this.talkerAvatarPath = res.data.avatar;
             this.lowerSearchMsg = "You Found Someone!";
             clearInterval(i);
           }
         }, 1000);
         setTimeout(async function () {
-          if (!this.isTalkerFound && this.isSearching) {
-            console.log("eqe");
-            await axios.delete("queue/delete");
-          }
+          await axios.delete("queue/delete");
           clearInterval(i);
         }, 10000);
       } else {
