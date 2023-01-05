@@ -99,12 +99,12 @@ export default {
         password: password,
         email: email,
       });
-      if (data.status !== 200) {
+      if (data.status !== 200 && data.status !== 201) {
         this.isError = true;
         this.errorMsg = "Something went wrong.";
         return;
       }
-      this.$router.push("/login");
+      this.$router.push({ name: "login" });
     },
   },
 };

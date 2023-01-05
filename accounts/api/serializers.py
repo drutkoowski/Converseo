@@ -26,7 +26,15 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         account = Account.objects.create_user(**validated_data)
+        account.is_active = True
+        account.save()
         return account
+
+
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ("email", "id", "username",)
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -57,5 +65,3 @@ class CreateQueueSerializer(serializers.ModelSerializer):
         user = Account.objects.get(pk=request.user.pk)
         search_queue = SearchQueue.objects.create(user=user)
         return search_queue
-
-

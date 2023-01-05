@@ -7,6 +7,7 @@ export default defineStore("user", {
   state: () => ({
     access: localStorage.getItem("accessToken") || "",
     refresh: localStorage.getItem("refreshToken") || "",
+    username: "",
     isAuthenticated:
       JSON.parse(localStorage.getItem("isAuthenticated")) || false,
   }),

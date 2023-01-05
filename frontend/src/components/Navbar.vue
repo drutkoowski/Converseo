@@ -8,7 +8,7 @@
     <p
       class="ml-5 mt-4 text-transparent bg-clip-text bg-gradient-to-br from-orange-200 to-red-600 cursor-pointer text-3xl underline underline-offset-8 underline decoration-orange-500/[.33] decoration-1 transition-all hover:-translate-y-0.5 hover:scale-105"
     >
-      Username
+      {{ username }}
     </p>
     <p
       @click.prevent="signOut"
@@ -21,13 +21,13 @@
 
 <script>
 import useUserStore from "@/stores/user";
+import { mapActions, mapState } from "pinia";
+
 export default {
   name: "Navbar",
-  methods: {
-    signOut() {
-      const store = useUserStore();
-      store.signOut();
-    },
+  computed: {
+    ...mapState(useUserStore, ["username"]),
+    ...mapActions(useUserStore, ["signOut"]),
   },
 };
 </script>

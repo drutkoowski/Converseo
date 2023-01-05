@@ -12,8 +12,8 @@ const axiosConfigResponse = axios.interceptors.response.use(
     return response;
   },
   (error) => {
-    tokenActions.resetToken();
-    router.push("login/");
+    // tokenActions.resetToken();
+    // router.push("login/");
     return Promise.reject(error.message);
   }
 );

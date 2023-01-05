@@ -89,6 +89,7 @@ export default {
       const password = values.password;
       this.isError = false;
       this.errorMsg = "";
+      console.log(username, password);
       try {
         const data = await axios.post(
           "token/",
@@ -98,6 +99,7 @@ export default {
           },
           { withCredentials: true }
         );
+        console.log(data);
         if (data.status !== 200) {
           this.isError = true;
           this.errorMsg = "User does not exist or credentials are invalid.";
@@ -108,6 +110,7 @@ export default {
         tokenActions.setToken(data.data.access, data.data.refresh);
         this.$router.push("/");
       } catch (error) {
+        console.log(error);
         this.isError = true;
         this.errorMsg = "Something went wrong.";
       }

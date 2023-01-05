@@ -38,6 +38,9 @@
         />
       </svg>
     </div>
+    <p class="mt-2 text-stone-50 text-xl" v-if="isTalkerFound">
+      {{ talkerUsername }}
+    </p>
     <h3
       class="text-center mt-10 text-transparent bg-clip-text bg-gradient-to-br from-orange-200 to-red-600 cursor-pointer text-3xl transition-all hover:-translate-y-0.5 hover:scale-105 ml-1"
     >
@@ -54,6 +57,8 @@ export default {
   data() {
     return {
       isSearching: false,
+      isTalkerFound: false,
+      talkerUsername: "",
       lowerSearchMsg: "Search Converseo",
     };
   },
@@ -63,16 +68,36 @@ export default {
       this.lowerSearchMsg = this.isSearching
         ? "Searching..."
         : "Search Converseo";
-      let response;
       if (this.isSearching) {
-        response = await axios.post("queue/create");
-        // setInterval(() => {
-        //   console.log("e");
-        // }, 1000);
+        await axios.post("queue/create");
+        const i = setInterval(async () => {
+          if (!this.isSearching) {
+            clearInterval(i);
+          }
+          // jesli dostaniesz goscia to usun interval
+          const res = await axios.get("queue/get-talker");
+          if (res.status === 200) {
+            console.log("FOUND", res.data.username);
+            this.isTalkerFound = true;
+            this.isSearching = false;
+            this.talkerUsername = res.data.username;
+            this.lowerSearchMsg = "You Found Someone!";
+            clearInterval(i);
+          }
+        }, 1000);
+        setTimeout(async function () {
+          if (!this.isTalkerFound && this.isSearching) {
+            console.log("eqe");
+            await axios.delete("queue/delete");
+          }
+          clearInterval(i);
+        }, 10000);
       } else {
-        response = await axios.delete("queue/delete");
+        this.isTalkerFound = false;
+        this.talkerUsername = "";
+        this.lowerSearchMsg = "Search Converseo";
+        await axios.delete("queue/delete");
       }
-      console.log(response);
     },
   },
 };

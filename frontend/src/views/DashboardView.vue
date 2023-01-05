@@ -10,6 +10,7 @@ import useUserStore from "@/stores/user";
 import { mapState } from "pinia/dist/pinia";
 import Navbar from "@/components/Navbar.vue";
 import SearchButton from "@/components/SearchButton.vue";
+import axios from "axios";
 
 export default {
   name: "DashboardView",
@@ -22,6 +23,11 @@ export default {
   },
   computed: {
     ...mapState(useUserStore, ["isAuthenticated", "access", "refresh"]),
+  },
+  async created() {
+    const userStore = useUserStore();
+    const response = await axios.get("user/current");
+    userStore.username = response.data.username;
   },
 };
 </script>
