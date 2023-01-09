@@ -10,7 +10,7 @@
       <img
         :src="talkerAvatarPath"
         alt="Avatar"
-        class="h-100 w-100 rounded-full outline outline-offset-2 align-text-bottom transition-all hover:-translate-y-0.5 hover:scale-105"
+        class="rounded-full outline outline-offset-2 align-text-bottom transition-all hover:-translate-y-0.5 hover:scale-105 user-avatar"
       />
     </div>
     <div
@@ -154,5 +154,9 @@ export default {
   100% {
     transform: scale(0.8);
   }
+}
+.user-avatar {
+  height: 100%;
+  width: 100%;
 }
 </style>
