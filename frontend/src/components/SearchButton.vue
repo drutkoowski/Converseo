@@ -57,14 +57,22 @@
     >
       {{ lowerSearchMsg }}
     </h3>
+    <div class="flex mt-4" v-if="isTalkerFound">
+      <DeciderButton :is-accept="false" />
+      <DeciderButton :is-accept="true" />
+    </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import DeciderButton from "./DeciderButton.vue";
 
 export default {
   name: "SearchButton",
+  components: {
+    DeciderButton,
+  },
   data() {
     return {
       isSearching: false,
