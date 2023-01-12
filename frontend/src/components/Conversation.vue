@@ -1,7 +1,114 @@
-<template>meo meo</template>
+<template>
+  <div class="grid-container">
+    <div class="card bg-gradient-to-br from-orange-200 to-red-300">
+      <div class="card__user-header mt-10 ml-4">
+        <img
+          class="rounded-full outline outline-pink-500 outline-offset-0.5 transition-all hover:-translate-y-0.5 hover:scale-105 w-20 h-20"
+          src="https://converseo.s3.amazonaws.com/media/avatars/nf.png"
+          alt=""
+        />
+        <h1
+          class="bg-clip-text from-orange-200 to-red-600 cursor-pointer text-4xl transition-all hover:-translate-y-0.5 hover:scale-105 ml-4 uppercase"
+        >
+          Username
+        </h1>
+      </div>
+      <hr class="mt-4" />
+      <div class="card__message-container">
+        <div class="card__message-container__message--receiver">
+          <p class="bg-gradient-to-r from-gray-700 to-gray-900 text-stone-50">
+            Hello World!
+          </p>
+        </div>
+
+        <div class="card__message-container__message--talker mt-4">
+          <img
+            class="ml-4 rounded-full outline outline-pink-500 outline-offset-0.5 transition-all hover:-translate-y-0.5 hover:scale-105 w-10 h-10"
+            src="https://converseo.s3.amazonaws.com/media/avatars/nf.png"
+            alt=""
+          />
+          <p
+            class="ml-4 bg-gradient-to-r from-stone-50 to-stone-200 text-black-50"
+          >
+            Hello World!
+          </p>
+        </div>
+      </div>
+      <div class="card__message-creator">
+        <input
+          type="text"
+          placeholder="Type a message..."
+          class="w-9/12 h-12 rounded-full text-xl"
+        />
+        <button class="bg-stone-700 text-stone-50 h-12 w-44 ml-4 rounded-full">
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
 
 <script>
 export default {
   name: "Conversation",
+  props: ["id"],
 };
 </script>
+
+<style scoped lang="scss">
+.isTalker {
+  margin-left: auto;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 0.25fr 1fr 0.25fr;
+  justify-content: center;
+  align-content: center;
+  margin-top: 6rem;
+  height: 75vh;
+}
+.card {
+  height: 85%;
+  border-radius: 20px;
+  grid-column: 2/3;
+  grid-row: 1/2;
+  hr {
+    border-top-width: 3px;
+  }
+  &__user-header {
+    display: flex;
+    align-items: center;
+  }
+  &__message-container {
+    padding: 2rem 2rem;
+    height: 70%;
+    overflow-y: hidden;
+    &__message--receiver {
+      display: flex;
+      align-items: center;
+      p {
+        font-size: 2rem;
+        padding: 0.25rem 2rem;
+        border-radius: 10px;
+      }
+    }
+    &__message--talker {
+      display: flex;
+      align-items: center;
+      p {
+        font-size: 2rem;
+        padding: 0.25rem 2rem;
+        border-radius: 10px;
+      }
+      img {
+        margin-left: auto;
+      }
+    }
+  }
+  &__message-creator {
+    padding: 0 2rem;
+  }
+}
+</style>

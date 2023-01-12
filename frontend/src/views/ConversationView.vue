@@ -1,7 +1,7 @@
 <template>
   <div class="bg-gradient-to-r from-gray-700 to-gray-900 min-h-screen">
     <Navbar />
-    <Conversation />
+    <Conversation :id="this.conversation_id" />
   </div>
 </template>
 
@@ -14,6 +14,11 @@ export default {
   components: {
     Navbar,
     Conversation,
+  },
+  data() {
+    return {
+      conversation_id: this.$route.params.conversation_id,
+    };
   },
 };
 </script>

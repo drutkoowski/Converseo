@@ -23,12 +23,19 @@
 <script>
 import useUserStore from "@/stores/user";
 import { mapActions, mapState } from "pinia";
+import axios from "axios";
 
 export default {
   name: "Navbar",
   computed: {
     ...mapState(useUserStore, ["username", "avatarPath"]),
     ...mapActions(useUserStore, ["signOut"]),
+  },
+  async created() {
+    const userStore = useUserStore();
+    const response = await axios.get("user/current");
+    userStore.username = response.data.username;
+    userStore.avatarPath = response.data.avatar;
   },
 };
 </script>

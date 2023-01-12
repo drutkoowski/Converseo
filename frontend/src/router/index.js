@@ -28,7 +28,7 @@ const router = createRouter({
       },
     },
     {
-      path: "/conversation",
+      path: "/conversation/:conversation_id",
       name: "conversation",
       component: ConversationView,
       meta: {

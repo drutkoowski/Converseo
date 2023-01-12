@@ -110,8 +110,8 @@ export default {
         `ws://127.0.0.1:8000/ws/queue/${userStore.username}/`
       );
       if (this.isSearching) {
-        console.log(ws);
         const ref = this;
+        const router = this.$router;
         ws.onmessage = function (e) {
           const data = JSON.parse(e.data);
           const randomTalker = data.random_talker.random_talker;
@@ -120,6 +120,13 @@ export default {
           console.log(randomTalker, roomId, subject);
           if (subject === "found") {
             ref.fillSearchInfo(randomTalker.username, randomTalker.avatar);
+            ws.close(1000);
+            setTimeout(function () {
+              router.push({
+                name: "conversation",
+                params: { conversation_id: "123" },
+              });
+            }, 2000);
           }
         };
       } else {
