@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import LoginView from "@/views/LoginView.vue";
 import SignupView from "@/views/SignupView.vue";
 import DashboardView from "@/views/DashboardView.vue";
-import TestView from "@/views/TestView.vue";
+import ConversationView from "@/views/ConversationView.vue";
 
 import useUserStore from "@/stores/user";
 
@@ -28,9 +28,9 @@ const router = createRouter({
       },
     },
     {
-      path: "/test",
-      name: "test",
-      component: TestView,
+      path: "/conversation",
+      name: "conversation",
+      component: ConversationView,
       meta: {
         requiresAuth: true,
       },

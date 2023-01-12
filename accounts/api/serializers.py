@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.models import Account, Post, SearchQueue
+from accounts.models import Account
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -34,32 +34,21 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ("email", "id", "username", "avatar")
 
-
-class PostSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Post
-        fields = ("author",)
-
-    def create(self, validated_data):
-        post = Post.objects.create(**validated_data)
-        return post
-
-
-class CreateQueueSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
-
-    class Meta:
-        model = SearchQueue
-        fields = ("user",
-                  "created_at", "expires_at")
-
-    def get_user(self, instance):
-        request = self.context.get("request")
-        user = Account.objects.get(pk=request.user.pk)
-        return user.username
-
-    def create(self, validated_data):
-        request = self.context.get("request")
-        user = Account.objects.get(pk=request.user.pk)
-        search_queue = SearchQueue.objects.create(user=user)
-        return search_queue
+# class CreateQueueSerializer(serializers.ModelSerializer):
+#     user = serializers.SerializerMethodField()
+#
+#     class Meta:
+#         model = SearchQueue
+#         fields = ("user",
+#                   "created_at", "expires_at")
+#
+#     def get_user(self, instance):
+#         request = self.context.get("request")
+#         user = Account.objects.get(pk=request.user.pk)
+#         return user.username
+#
+#     def create(self, validated_data):
+#         request = self.context.get("request")
+#         user = Account.objects.get(pk=request.user.pk)
+#         search_queue = SearchQueue.objects.create(user=user)
+#         return search_queue

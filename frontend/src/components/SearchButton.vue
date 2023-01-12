@@ -65,7 +65,7 @@
 </template>
 
 <script>
-import axios from "axios";
+// import axios from "axios";
 import DeciderButton from "./DeciderButton.vue";
 
 export default {
@@ -83,6 +83,45 @@ export default {
     };
   },
   methods: {
+    // async toggleSearch() {
+    //   this.isSearching = !this.isSearching;
+    //   this.isTalkerFound = false;
+    //   this.talkerUsername = "";
+    //   this.talkerAvatarPath = "";
+    //   this.lowerSearchMsg = this.isSearching
+    //     ? "Searching..."
+    //     : "Search Converseo";
+    //   if (this.isSearching) {
+    //     await axios.post("queue/create");
+    //     const i = setInterval(async () => {
+    //       if (!this.isSearching) {
+    //         clearInterval(i);
+    //       }
+    //       const res = await axios.get("queue/get-talker");
+    //       if (res.status === 200) {
+    //         console.log("FOUND", res);
+    //         this.isTalkerFound = true;
+    //         this.isSearching = false;
+    //         this.talkerUsername = res.data.username;
+    //         this.talkerAvatarPath = res.data.avatar;
+    //         this.lowerSearchMsg = "You Found Someone!";
+    //         this.$router.push({ name: "conversation" });
+    //         clearInterval(i);
+    //       }
+    //     }, 1000);
+    //     setTimeout(async function () {
+    //       await axios.delete("queue/delete");
+    //       clearInterval(i);
+    //     }, 10000);
+    //   } else {
+    //     this.isTalkerFound = false;
+    //     this.isSearching = false;
+    //     this.talkerUsername = "";
+    //     this.talkerAvatarPath = "";
+    //     this.lowerSearchMsg = "Search Converseo";
+    //     await axios.delete("queue/delete");
+    //   }
+    // },
     async toggleSearch() {
       this.isSearching = !this.isSearching;
       this.isTalkerFound = false;
@@ -91,35 +130,6 @@ export default {
       this.lowerSearchMsg = this.isSearching
         ? "Searching..."
         : "Search Converseo";
-      if (this.isSearching) {
-        await axios.post("queue/create");
-        const i = setInterval(async () => {
-          if (!this.isSearching) {
-            clearInterval(i);
-          }
-          const res = await axios.get("queue/get-talker");
-          if (res.status === 200) {
-            console.log("FOUND", res);
-            this.isTalkerFound = true;
-            this.isSearching = false;
-            this.talkerUsername = res.data.username;
-            this.talkerAvatarPath = res.data.avatar;
-            this.lowerSearchMsg = "You Found Someone!";
-            clearInterval(i);
-          }
-        }, 1000);
-        setTimeout(async function () {
-          await axios.delete("queue/delete");
-          clearInterval(i);
-        }, 10000);
-      } else {
-        this.isTalkerFound = false;
-        this.isSearching = false;
-        this.talkerUsername = "";
-        this.talkerAvatarPath = "";
-        this.lowerSearchMsg = "Search Converseo";
-        await axios.delete("queue/delete");
-      }
     },
   },
 };
