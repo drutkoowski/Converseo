@@ -67,6 +67,7 @@
 <script>
 // import axios from "axios";
 import DeciderButton from "./DeciderButton.vue";
+import useUserStore from "@/stores/user";
 
 export default {
   name: "SearchButton",
@@ -83,46 +84,7 @@ export default {
     };
   },
   methods: {
-    // async toggleSearch() {
-    //   this.isSearching = !this.isSearching;
-    //   this.isTalkerFound = false;
-    //   this.talkerUsername = "";
-    //   this.talkerAvatarPath = "";
-    //   this.lowerSearchMsg = this.isSearching
-    //     ? "Searching..."
-    //     : "Search Converseo";
-    //   if (this.isSearching) {
-    //     await axios.post("queue/create");
-    //     const i = setInterval(async () => {
-    //       if (!this.isSearching) {
-    //         clearInterval(i);
-    //       }
-    //       const res = await axios.get("queue/get-talker");
-    //       if (res.status === 200) {
-    //         console.log("FOUND", res);
-    //         this.isTalkerFound = true;
-    //         this.isSearching = false;
-    //         this.talkerUsername = res.data.username;
-    //         this.talkerAvatarPath = res.data.avatar;
-    //         this.lowerSearchMsg = "You Found Someone!";
-    //         this.$router.push({ name: "conversation" });
-    //         clearInterval(i);
-    //       }
-    //     }, 1000);
-    //     setTimeout(async function () {
-    //       await axios.delete("queue/delete");
-    //       clearInterval(i);
-    //     }, 10000);
-    //   } else {
-    //     this.isTalkerFound = false;
-    //     this.isSearching = false;
-    //     this.talkerUsername = "";
-    //     this.talkerAvatarPath = "";
-    //     this.lowerSearchMsg = "Search Converseo";
-    //     await axios.delete("queue/delete");
-    //   }
-    // },
-    async toggleSearch() {
+    clearSearch() {
       this.isSearching = !this.isSearching;
       this.isTalkerFound = false;
       this.talkerUsername = "";
@@ -130,6 +92,39 @@ export default {
       this.lowerSearchMsg = this.isSearching
         ? "Searching..."
         : "Search Converseo";
+    },
+    fillSearchInfo(username, avatarPath) {
+      this.isSearching = !this.isSearching;
+      this.isTalkerFound = true;
+      this.talkerUsername = username;
+      this.talkerAvatarPath = avatarPath;
+      this.lowerSearchMsg = "You found someone!";
+    },
+    async toggleSearch() {
+      this.clearSearch();
+      this.lowerSearchMsg = this.isSearching
+        ? "Searching..."
+        : "Search Converseo";
+      const userStore = useUserStore();
+      const ws = new WebSocket(
+        `ws://127.0.0.1:8000/ws/queue/${userStore.username}/`
+      );
+      if (this.isSearching) {
+        console.log(ws);
+        const ref = this;
+        ws.onmessage = function (e) {
+          const data = JSON.parse(e.data);
+          const randomTalker = data.random_talker.random_talker;
+          const roomId = data.random_talker.room_id;
+          const subject = data.random_talker.subject;
+          console.log(randomTalker, roomId, subject);
+          if (subject === "found") {
+            ref.fillSearchInfo(randomTalker.username, randomTalker.avatar);
+          }
+        };
+      } else {
+        ws.close(1000);
+      }
     },
   },
 };
