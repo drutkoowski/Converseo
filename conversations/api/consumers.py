@@ -1,21 +1,26 @@
 import json
+
+from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.db.models import Q
 from django.db.models.functions import Now
 from accounts.api.serializers import AccountSerializer
 from accounts.models import Account
-from conversations.api.serializers import QueueSerializer, ConversationSerializer
-from conversations.models import Conversation, SearchQueue
+from conversations.api.serializers import QueueSerializer, ConversationSerializer, MessageSerializer
+from conversations.models import Conversation, SearchQueue, Message
 from djangochannelsrestframework.generics import GenericAsyncAPIConsumer
 from djangochannelsrestframework.mixins import ListModelMixin
 from djangochannelsrestframework.observer import model_observer
 from djangochannelsrestframework import permissions
-
+import json
 
 class QueueConsumer(GenericAsyncAPIConsumer):
     serializer_class = QueueSerializer
     permission_classes = (permissions.AllowAny,)
 
+    # @database_sync_to_async
+    # def get_user(self, username):
+    #     return Account.objects.get(username=username)
 
     @database_sync_to_async
     def create_search_queue(self, user):
@@ -86,12 +91,11 @@ class QueueConsumer(GenericAsyncAPIConsumer):
                 )
 
     async def disconnect(self, code):
-        user = self.scope['user']
-        if user is not None:
-            await self.delete_search_query(user)
-            self.channel_layer.group_discard(self.room_group_name,
-                                             self.channel_name)
-            await self.close()
+        # user = await self.get_user(self.scope["url_route"]["kwargs"]["username"])
+        await self.delete_search_query(self.scope['user'])
+        self.channel_layer.group_discard(self.room_group_name,
+                                         self.channel_name)
+        await self.close()
 
     async def send_message(self, event):
         # Receive message from room group
@@ -125,34 +129,70 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
     def get_conversation(self, id):
         return Conversation.objects.get(pk=id)
 
-    # jesli jakis nowy user sie polaczy z systemem, subskrybuje model change
+    @database_sync_to_async
+    def is_conversation_user(self, conversation, user):
+        if user in conversation.users.all():
+            return True
+        return False
+
+    @database_sync_to_async
+    def save_message(self, user, conversation, message):
+        Message.objects.create(user=user, conversation=conversation, content=message)
+
+    @database_sync_to_async
+    def get_all_messages(self, conversation):
+        messages = Message.objects.filter(conversation=conversation).order_by("conversation__created_at").all()
+        json_data = json.dumps({"messages": MessageSerializer(messages, many=True).data})
+        return json_data
+
     async def connect(self, **kwargs):
-        # await self.channel_layer.group_add() // lub group_discard dla disconnect
         conversation_id = self.scope["url_route"]["kwargs"]['id']
         conversation = await self.get_conversation(conversation_id)
-        if conversation is not None:
-            user = self.scope
-
+        user_connecting = self.scope['user']
+        is_participant = await self.is_conversation_user(conversation, user_connecting)
+        if conversation is not None and is_participant:
             self.room_group_name = f'chat-{conversation_id}'
-
             await self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name
             )
+            messages = await self.get_all_messages(conversation)
             await self.accept()
+            await self.send_json(messages)
 
         #
 
-
     async def disconnect(self, code):
-        user = await self.get_user(self.scope["url_route"]["kwargs"]["username"])
-        self.channel_layer.group_discard(self.room_group_name,
-                                         self.channel_name)
+        # user = await self.get_user(self.scope["url_route"]["kwargs"]["username"])
+        # await self.delete_search_query(self.scope['user'])
+        # self.channel_layer.group_discard(self.room_group_name,
+        #                                  self.channel_name)
         await self.close()
 
-    async def send_message(self, event):
-        # Receive message from room group
-        message = event
+    async def receive(self, text_data=None, bytes_data=None, **kwargs):
+        data = json.loads(text_data)
+        print(data)
+        message = data['message']
+        user = self.scope['user']
+        conversation = await self.get_conversation(data['conversation_id'])
+        await self.save_message(user, conversation, message)
+
+        # Send message to room group
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'chat_message',
+                'message': message,
+                'user': AccountSerializer(instance=user).data
+            }
+        )
+
+    async def chat_message(self, event):
+        message = event['message']
+        user = event['user']
+
+        # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            'random_talker': message
+            'message': message,
+            'user': user
         }))

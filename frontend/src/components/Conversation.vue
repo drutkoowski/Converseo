@@ -37,10 +37,13 @@
       <div class="card__message-creator">
         <input
           type="text"
+          id="message"
+          v-model="message"
           placeholder="Type a message..."
           class="w-9/12 h-12 rounded-full text-xl"
         />
         <button
+          @click.prevent="sendMessage"
           class="bg-gradient-to-r from-gray-700 to-gray-900 text-stone-50 h-12 w-44 ml-4 rounded-full text-center text-uppercase text-2xl"
         >
           Send
@@ -56,12 +59,32 @@ import useUserStore from "@/stores/user";
 export default {
   name: "Conversation",
   props: ["id"],
+  data() {
+    return {
+      message: "",
+      ws: "",
+    };
+  },
   created() {
     const userStore = useUserStore();
-    const ws = new WebSocket(
+    this.ws = new WebSocket(
       `ws://127.0.0.1:8000/ws/conversations/${this.id}/?token=${userStore.access}`
     );
-    console.log(ws);
+    this.ws.onmessage = function (e) {
+      console.log(e);
+    };
+  },
+  methods: {
+    async sendMessage() {
+      const userStore = useUserStore();
+      this.ws.send(
+        JSON.stringify({
+          message: this.message,
+          conversation_id: this.id,
+          token: userStore.access,
+        })
+      );
+    },
   },
 };
 </script>

@@ -39,6 +39,7 @@ class JwtAuthMiddleware(BaseMiddleware):
 
         # Get the token
         token = parse_qs(scope["query_string"].decode("utf8"))["token"][0]
+        # print(scope, 'scope')
         # Try to authenticate the user
         try:
             # This will automatically validate the token and raise an error if token is invalid

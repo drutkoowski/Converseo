@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from accounts.api.serializers import AccountSerializer
 from accounts.models import Account
-from conversations.models import SearchQueue, Conversation
+from conversations.models import SearchQueue, Conversation, Message
 
 
 class QueueSerializer(serializers.ModelSerializer):
@@ -29,3 +29,13 @@ class ConversationSerializer(serializers.ModelSerializer):
         model = Conversation
         fields = "__all__"
 
+
+class MessageSerializer(serializers.ModelSerializer):
+    conversation = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Message
+        fields = "__all__"
+
+    def get_conversation(self, instance):
+        return instance.conversation.pk
