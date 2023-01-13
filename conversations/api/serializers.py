@@ -1,7 +1,7 @@
 from rest_framework import serializers
-
+from accounts.api.serializers import AccountSerializer
 from accounts.models import Account
-from conversations.models import SearchQueue
+from conversations.models import SearchQueue, Conversation
 
 
 class QueueSerializer(serializers.ModelSerializer):
@@ -20,3 +20,12 @@ class QueueSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         search_queue = SearchQueue(user__pk=request.user.pk)
         search_queue.save()
+
+
+class ConversationSerializer(serializers.ModelSerializer):
+    user = AccountSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Conversation
+        fields = "__all__"
+

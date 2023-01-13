@@ -51,9 +51,18 @@
 </template>
 
 <script>
+import useUserStore from "@/stores/user";
+
 export default {
   name: "Conversation",
   props: ["id"],
+  created() {
+    const userStore = useUserStore();
+    const ws = new WebSocket(
+      `ws://127.0.0.1:8000/ws/conversations/${this.id}/?token=${userStore.access}`
+    );
+    console.log(ws);
+  },
 };
 </script>
 

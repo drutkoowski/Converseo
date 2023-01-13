@@ -107,9 +107,8 @@ export default {
         : "Search Converseo";
       const userStore = useUserStore();
       const ws = new WebSocket(
-        `ws://127.0.0.1:8000/ws/queue/${userStore.username}/`
+        `ws://127.0.0.1:8000/ws/queue/${userStore.username}/?token=${userStore.access}`
       );
-      console.log(ws);
       if (this.isSearching) {
         const ref = this;
         const router = this.$router;
@@ -118,14 +117,13 @@ export default {
           const randomTalker = data.random_talker.random_talker;
           const roomId = data.random_talker.room_id;
           const subject = data.random_talker.subject;
-          console.log(randomTalker, roomId, subject);
           if (subject === "found") {
             ref.fillSearchInfo(randomTalker.username, randomTalker.avatar);
             ws.close(1000);
             setTimeout(function () {
               router.push({
                 name: "conversation",
-                params: { conversation_id: "123" },
+                params: { conversation_id: roomId },
               });
             }, 2000);
           }

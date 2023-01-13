@@ -14,7 +14,7 @@ def get_expire_date():
 
 # Create your models here.
 class Conversation(models.Model):
-    users = models.ForeignKey(Account, on_delete=models.CASCADE)
+    users = models.ManyToManyField(Account)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
