@@ -32,6 +32,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     conversation = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
@@ -39,3 +40,6 @@ class MessageSerializer(serializers.ModelSerializer):
 
     def get_conversation(self, instance):
         return instance.conversation.pk
+
+    def get_username(self, instance):
+        return instance.user.username

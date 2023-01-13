@@ -4,35 +4,24 @@
       <div class="card__user-header mt-10 ml-4">
         <img
           class="rounded-full outline outline-pink-500 outline-offset-0.5 transition-all hover:-translate-y-0.5 hover:scale-105 w-20 h-20"
-          src="https://converseo.s3.amazonaws.com/media/avatars/nf.png"
+          :src="talkerAvatar"
           alt=""
         />
         <h1
           class="bg-clip-text from-orange-200 to-red-600 cursor-pointer text-4xl transition-all hover:-translate-y-0.5 hover:scale-105 ml-4 uppercase"
         >
-          Username
+          {{ talkerUsername }}
         </h1>
       </div>
       <hr class="mt-4" />
-      <div class="card__message-container">
-        <div class="card__message-container__message--receiver">
-          <p class="bg-gradient-to-r from-gray-700 to-gray-900 text-stone-50">
-            Hello World!
-          </p>
-        </div>
-
-        <div class="card__message-container__message--talker mt-4">
-          <img
-            class="ml-4 rounded-full outline outline-pink-500 outline-offset-0.5 transition-all hover:-translate-y-0.5 hover:scale-105 w-10 h-10"
-            src="https://converseo.s3.amazonaws.com/media/avatars/nf.png"
-            alt=""
-          />
-          <p
-            class="ml-4 bg-gradient-to-r from-stone-50 to-stone-200 text-black-50"
-          >
-            Hello World!
-          </p>
-        </div>
+      <div class="card__message-container mb-2">
+        <ChatMessage
+          v-for="message in messages"
+          :key="message.id"
+          :isHost="message.username !== talkerUsername"
+          :content="message.content"
+          :avatar="talkerAvatar"
+        />
       </div>
       <div class="card__message-creator">
         <input
@@ -55,23 +44,44 @@
 
 <script>
 import useUserStore from "@/stores/user";
+import ChatMessage from "@/components/ChatMessage.vue";
+import { mapState } from "pinia";
 
 export default {
   name: "Conversation",
+  components: {
+    ChatMessage,
+  },
   props: ["id"],
   data() {
     return {
       message: "",
       ws: "",
+      messages: [],
+      talkerUsername: "",
+      talkerAvatar: "",
     };
+  },
+  computed: {
+    ...mapState(useUserStore, ["username"]),
   },
   created() {
     const userStore = useUserStore();
+    const ref = this;
     this.ws = new WebSocket(
       `ws://127.0.0.1:8000/ws/conversations/${this.id}/?token=${userStore.access}`
     );
     this.ws.onmessage = function (e) {
-      console.log(e);
+      const data = JSON.parse(e.data);
+      console.log(data);
+      if (data.status === "initial") {
+        ref.messages = Array.from(JSON.parse(data.messages));
+        ref.talkerUsername = JSON.parse(data.talker)["username"];
+        ref.talkerAvatar = JSON.parse(data.talker)["avatar"];
+      }
+      if (data.status === "update") {
+        console.log("update");
+      }
     };
   },
   methods: {
@@ -119,27 +129,6 @@ export default {
     padding: 2rem 2rem;
     height: 65%;
     overflow-y: hidden;
-    &__message--receiver {
-      display: flex;
-      align-items: center;
-      p {
-        font-size: 2rem;
-        padding: 0.25rem 2rem;
-        border-radius: 10px;
-      }
-    }
-    &__message--talker {
-      display: flex;
-      align-items: center;
-      p {
-        font-size: 2rem;
-        padding: 0.25rem 2rem;
-        border-radius: 10px;
-      }
-      img {
-        margin-left: auto;
-      }
-    }
   }
   &__message-creator {
     padding: 0 2rem;

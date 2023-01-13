@@ -14,6 +14,7 @@ from djangochannelsrestframework.observer import model_observer
 from djangochannelsrestframework import permissions
 import json
 
+
 class QueueConsumer(GenericAsyncAPIConsumer):
     serializer_class = QueueSerializer
     permission_classes = (permissions.AllowAny,)
@@ -126,6 +127,15 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
         return Account.objects.get(username=username)
 
     @database_sync_to_async
+    def get_talker_user(self, user, conversation):
+        conversation = Conversation.objects.get(pk=conversation.pk)
+        users = conversation.users.all()
+        for el in users:
+            if el != user:
+                json_data = json.dumps(AccountSerializer(el).data)
+                return json_data
+
+    @database_sync_to_async
     def get_conversation(self, id):
         return Conversation.objects.get(pk=id)
 
@@ -137,12 +147,13 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
 
     @database_sync_to_async
     def save_message(self, user, conversation, message):
-        Message.objects.create(user=user, conversation=conversation, content=message)
+        message = Message.objects.create(user=user, conversation=conversation, content=message)
+        return message
 
     @database_sync_to_async
     def get_all_messages(self, conversation):
         messages = Message.objects.filter(conversation=conversation).order_by("conversation__created_at").all()
-        json_data = json.dumps({"messages": MessageSerializer(messages, many=True).data})
+        json_data = json.dumps(MessageSerializer(messages, many=True).data)
         return json_data
 
     async def connect(self, **kwargs):
@@ -157,8 +168,9 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
                 self.channel_name
             )
             messages = await self.get_all_messages(conversation)
+            talker = await self.get_talker_user(user_connecting, conversation)
             await self.accept()
-            await self.send_json(messages)
+            await self.send_json({'messages': messages, 'status': 'initial', 'talker': talker})
 
         #
 
@@ -171,28 +183,27 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         data = json.loads(text_data)
-        print(data)
         message = data['message']
         user = self.scope['user']
         conversation = await self.get_conversation(data['conversation_id'])
-        await self.save_message(user, conversation, message)
+        message = await self.save_message(user, conversation, message)
 
         # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': message,
-                'user': AccountSerializer(instance=user).data
+                'message': MessageSerializer(instance=message).data,
+                'status': 'updated'
             }
         )
 
     async def chat_message(self, event):
         message = event['message']
-        user = event['user']
+        status = event['status']
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'message': message,
-            'user': user
+            'status': status
         }))
