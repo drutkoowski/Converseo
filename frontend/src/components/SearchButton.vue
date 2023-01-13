@@ -107,7 +107,7 @@ export default {
         : "Search Converseo";
       const userStore = useUserStore();
       const ws = new WebSocket(
-        `ws://127.0.0.1:8000/ws/queue/${userStore.username}/?token=${userStore.access}`
+        `ws://127.0.0.1:8000/ws/queue/?token=${userStore.access}`
       );
       if (this.isSearching) {
         const ref = this;

@@ -1,15 +1,11 @@
 import json
-
-from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 from django.db.models import Q
 from django.db.models.functions import Now
-
 from accounts.api.serializers import AccountSerializer
 from accounts.models import Account
 from conversations.api.serializers import QueueSerializer, ConversationSerializer
 from conversations.models import Conversation, SearchQueue
-
 from djangochannelsrestframework.generics import GenericAsyncAPIConsumer
 from djangochannelsrestframework.mixins import ListModelMixin
 from djangochannelsrestframework.observer import model_observer
@@ -20,9 +16,6 @@ class QueueConsumer(GenericAsyncAPIConsumer):
     serializer_class = QueueSerializer
     permission_classes = (permissions.AllowAny,)
 
-    @database_sync_to_async
-    def get_user(self, username):
-        return Account.objects.get(username=username)
 
     @database_sync_to_async
     def create_search_queue(self, user):
@@ -58,46 +51,47 @@ class QueueConsumer(GenericAsyncAPIConsumer):
     # jesli jakis nowy user sie polaczy z systemem, subskrybuje model change
     async def connect(self, **kwargs):
         # await self.channel_layer.group_add() // lub group_discard dla disconnect
-        username = self.scope["url_route"]["kwargs"]["username"]
-        await self.accept()
-        self.room_group_name = username
+        user = self.scope['user']
+        if user is not None:
+            await self.accept()
+            self.room_group_name = user.username
 
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name
+            )
 
-        #
-        user = await self.get_user(username)
-        await self.create_search_queue(user)
-        random_talker = await self.get_random_talker(user)
-        if random_talker is not None:
-            conversation = await self.create_conversation_room(user, random_talker)
-            await self.channel_layer.group_send(
-                "{}".format(random_talker.username),
-                {
-                    'type': 'send_message',
-                    'random_talker': AccountSerializer(instance=user).data,
-                    'room_id': conversation.pk,
-                    'subject': 'found'
-                }
-            )
-            await self.channel_layer.group_send(
-                "{}".format(username),
-                {
-                    'type': 'send_message',
-                    'random_talker': AccountSerializer(instance=random_talker).data,
-                    'room_id': conversation.pk,
-                    'subject': 'found'
-                }
-            )
+            #
+            await self.create_search_queue(user)
+            random_talker = await self.get_random_talker(user)
+            if random_talker is not None:
+                conversation = await self.create_conversation_room(user, random_talker)
+                await self.channel_layer.group_send(
+                    "{}".format(random_talker.username),
+                    {
+                        'type': 'send_message',
+                        'random_talker': AccountSerializer(instance=user).data,
+                        'room_id': conversation.pk,
+                        'subject': 'found'
+                    }
+                )
+                await self.channel_layer.group_send(
+                    "{}".format(user.username),
+                    {
+                        'type': 'send_message',
+                        'random_talker': AccountSerializer(instance=random_talker).data,
+                        'room_id': conversation.pk,
+                        'subject': 'found'
+                    }
+                )
 
     async def disconnect(self, code):
-        user = await self.get_user(self.scope["url_route"]["kwargs"]["username"])
-        await self.delete_search_query(user)
-        self.channel_layer.group_discard(self.room_group_name,
-                                         self.channel_name)
-        await self.close()
+        user = self.scope['user']
+        if user is not None:
+            await self.delete_search_query(user)
+            self.channel_layer.group_discard(self.room_group_name,
+                                             self.channel_name)
+            await self.close()
 
     async def send_message(self, event):
         # Receive message from room group
