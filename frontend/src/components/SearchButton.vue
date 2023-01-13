@@ -109,6 +109,7 @@ export default {
       const ws = new WebSocket(
         `ws://127.0.0.1:8000/ws/queue/${userStore.username}/`
       );
+      console.log(ws);
       if (this.isSearching) {
         const ref = this;
         const router = this.$router;

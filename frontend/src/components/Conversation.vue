@@ -40,7 +40,9 @@
           placeholder="Type a message..."
           class="w-9/12 h-12 rounded-full text-xl"
         />
-        <button class="bg-stone-700 text-stone-50 h-12 w-44 ml-4 rounded-full">
+        <button
+          class="bg-gradient-to-r from-gray-700 to-gray-900 text-stone-50 h-12 w-44 ml-4 rounded-full text-center text-uppercase text-2xl"
+        >
           Send
         </button>
       </div>
@@ -83,7 +85,7 @@ export default {
   }
   &__message-container {
     padding: 2rem 2rem;
-    height: 70%;
+    height: 65%;
     overflow-y: hidden;
     &__message--receiver {
       display: flex;
@@ -109,6 +111,20 @@ export default {
   }
   &__message-creator {
     padding: 0 2rem;
+    input {
+      padding: 0 2rem;
+      transition: all 0.3s ease-in;
+      &:focus {
+        outline: none;
+        transform: scale(1.01);
+      }
+    }
+    button {
+      transition: all 0.3s ease-in;
+      &:hover {
+        transform: scale(1.02);
+      }
+    }
   }
 }
 </style>
