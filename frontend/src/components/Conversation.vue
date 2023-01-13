@@ -15,6 +15,17 @@
       </div>
       <hr class="mt-4" />
       <div class="card__message-container mb-2">
+        <div
+          v-if="messages.length === 0"
+          class="grid place-content-center justify-items-center mt-5"
+        >
+          <img
+            src="https://converseo.s3.eu-central-1.amazonaws.com/no-message.svg"
+            class="w-10 h-10"
+            alt="No message icon"
+          />
+          <p class="text-2xl mt-4">No messages yet.</p>
+        </div>
         <ChatMessage
           v-for="message in messages"
           :key="message.id"
