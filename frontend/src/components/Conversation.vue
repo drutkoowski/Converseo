@@ -14,7 +14,7 @@
         </h1>
       </div>
       <hr class="mt-4" />
-      <div class="card__message-container mb-2">
+      <div class="card__message-container mb-2" id="container">
         <div
           v-if="messages.length === 0"
           class="grid place-content-center justify-items-center mt-5"
@@ -83,17 +83,19 @@ export default {
       `ws://127.0.0.1:8000/ws/conversations/${this.id}/?token=${userStore.access}`
     );
     this.ws.onmessage = function (e) {
+      console.log(e);
       const data = JSON.parse(e.data);
-      console.log(data);
       if (data.status === "initial") {
         ref.messages = Array.from(JSON.parse(data.messages));
         ref.talkerUsername = JSON.parse(data.talker)["username"];
         ref.talkerAvatar = JSON.parse(data.talker)["avatar"];
       }
       if (data.status === "update") {
-        console.log("update");
+        ref.messages.push(data.message);
+        ref.scrollToBottom();
       }
     };
+    this.scrollToBottom();
   },
   methods: {
     async sendMessage() {
@@ -105,6 +107,14 @@ export default {
           token: userStore.access,
         })
       );
+      this.message = "";
+    },
+    scrollToBottom() {
+      // let objDiv = document.getElementById("container");
+      // console.log(objDiv.scrollHeight);
+      // objDiv.scrollTop = objDiv.scrollHeight;
+      const el = this.$refs.container;
+      console.log(el);
     },
   },
 };
@@ -139,7 +149,8 @@ export default {
   &__message-container {
     padding: 2rem 2rem;
     height: 65%;
-    overflow-y: hidden;
+    max-height: 35rem;
+    overflow-y: auto;
   }
   &__message-creator {
     padding: 0 2rem;

@@ -183,6 +183,7 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         data = json.loads(text_data)
+        print(data)
         message = data['message']
         user = self.scope['user']
         conversation = await self.get_conversation(data['conversation_id'])
@@ -194,7 +195,7 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
             {
                 'type': 'chat_message',
                 'message': MessageSerializer(instance=message).data,
-                'status': 'updated'
+                'status': 'update'
             }
         )
 
