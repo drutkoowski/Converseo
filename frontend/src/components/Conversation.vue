@@ -57,6 +57,8 @@
     @closeModal="isModal = false"
     :header="'Additional confirmation required'"
     :body="'Are you sure you want to delete this conversation?'"
+    tabindex="0"
+    @keyup.esc="isModal = false"
   />
 </template>
 
@@ -161,7 +163,7 @@ export default {
   }
 
   &__message-container::-webkit-scrollbar-track {
-    background: #70706e; /* color of the tracking area */
+    background: #f68566; /* color of the tracking area */
   }
 
   &__message-container::-webkit-scrollbar-thumb {

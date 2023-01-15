@@ -1,17 +1,17 @@
 <template>
-  <transition name="modal">
-    <div class="modal-mask" @keyup.esc="this.$emit('closeModal')">
+  <transition name="fade" mode="out-in">
+    <div class="modal-mask" @click="this.$emit('closeModal')">
       <div class="modal-wrapper">
         <div
           class="modal-container bg-gradient-to-r from-gray-700 to-gray-900 text-stone-50"
         >
           <CloseButton @click.prevent="this.$emit('closeModal')" />
           <div class="modal-header">
-            <slot name="header"> {{ header }} </slot>
+            <h3 class="text-red-500">{{ header }}</h3>
           </div>
 
           <div class="modal-body">
-            <slot name="body"> {{ body }}</slot>
+            <p>{{ body }}</p>
           </div>
 
           <div class="modal-footer">
@@ -35,6 +35,14 @@ export default {
   name: "PopupModal",
   props: ["header", "body"],
   components: { CloseButton },
+  created() {
+    document.onkeydown = (evt) => {
+      evt = evt || window.event;
+      if (evt.keyCode == 27) {
+        this.$emit("closeModal");
+      }
+    };
+  },
 };
 </script>
 
@@ -58,6 +66,7 @@ export default {
 
 .modal-container {
   width: 40%;
+  height: auto;
   margin: 0px auto;
   padding: 20px 10px;
   background-color: #fff;
@@ -69,31 +78,29 @@ export default {
 
 .modal-header h3 {
   margin-top: 0;
-  color: #42b983;
+  font-size: 1.5rem;
 }
 
 .modal-body {
-  margin: 20px 0;
+  margin: 2rem 0;
+  font-size: 1rem;
 }
 
 .modal-default-button {
   float: right;
+  margin-bottom: 0.5rem;
 }
 
-/*
- * The following styles are auto-applied to elements with
- * transition="modal" when their visibility is toggled
- * by Vue.js.
- *
- * You can easily play with the modal transition by editing
- * these styles.
- */
-
-.modal-enter {
+.fade-enter-from {
   opacity: 0;
 }
 
-.modal-leave-active {
+.fade-enter-active {
+  transition: all 0.5s linear;
+}
+
+.fade-leave-to {
+  transition: all 0.5s linear;
   opacity: 0;
 }
 
@@ -104,6 +111,6 @@ export default {
 }
 
 .modal-footer {
-  margin-bottom: 2.5rem;
+  margin-bottom: 3.5rem;
 }
 </style>
