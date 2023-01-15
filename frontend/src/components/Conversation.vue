@@ -14,7 +14,7 @@
         </h1>
       </div>
       <hr class="mt-4" />
-      <div class="card__message-container mb-2" id="container">
+      <div class="card__message-container mb-2" id="container" ref="scrollToMe">
         <div
           v-if="messages.length === 0"
           class="grid place-content-center justify-items-center mt-5"
@@ -76,6 +76,9 @@ export default {
   computed: {
     ...mapState(useUserStore, ["username"]),
   },
+  updated() {
+    this.scrollToBottom();
+  },
   created() {
     const userStore = useUserStore();
     const ref = this;
@@ -83,7 +86,6 @@ export default {
       `ws://127.0.0.1:8000/ws/conversations/${this.id}/?token=${userStore.access}`
     );
     this.ws.onmessage = function (e) {
-      console.log(e);
       const data = JSON.parse(e.data);
       if (data.status === "initial") {
         ref.messages = Array.from(JSON.parse(data.messages));
@@ -92,10 +94,8 @@ export default {
       }
       if (data.status === "update") {
         ref.messages.push(data.message);
-        ref.scrollToBottom();
       }
     };
-    this.scrollToBottom();
   },
   methods: {
     async sendMessage() {
@@ -110,11 +110,8 @@ export default {
       this.message = "";
     },
     scrollToBottom() {
-      // let objDiv = document.getElementById("container");
-      // console.log(objDiv.scrollHeight);
-      // objDiv.scrollTop = objDiv.scrollHeight;
-      const el = this.$refs.container;
-      console.log(el);
+      const objDiv = document.getElementById("container");
+      objDiv.scrollTop = objDiv.scrollHeight;
     },
   },
 };
@@ -146,10 +143,24 @@ export default {
     display: flex;
     align-items: center;
   }
+
+  &__message-container::-webkit-scrollbar {
+    width: 12px; /* width of the entire scrollbar */
+  }
+
+  &__message-container::-webkit-scrollbar-track {
+    background: #70706e; /* color of the tracking area */
+  }
+
+  &__message-container::-webkit-scrollbar-thumb {
+    background-color: #252424; /* color of the scroll thumb */
+    border-radius: 30px; /* roundness of the scroll thumb */
+    border: 3px solid #262626; /* creates padding around scroll thumb */
+  }
   &__message-container {
     padding: 2rem 2rem;
     height: 65%;
-    max-height: 35rem;
+    max-height: 25rem;
     overflow-y: auto;
   }
   &__message-creator {
