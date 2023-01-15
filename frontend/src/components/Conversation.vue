@@ -12,9 +12,10 @@
         >
           {{ talkerUsername }}
         </h1>
+        <CloseButton class="mr-5" @openModal="isModal = true" />
       </div>
       <hr class="mt-4" />
-      <div class="card__message-container mb-2" id="container" ref="scrollToMe">
+      <div class="card__message-container mb-2" ref="scrollToMe">
         <div
           v-if="messages.length === 0"
           class="grid place-content-center justify-items-center mt-5"
@@ -40,28 +41,38 @@
           id="message"
           v-model="message"
           placeholder="Type a message..."
-          class="w-9/12 h-12 rounded-full text-xl"
+          class="h-12 rounded-full text-xl"
         />
         <button
           @click.prevent="sendMessage"
-          class="bg-gradient-to-r from-gray-700 to-gray-900 text-stone-50 h-12 w-44 ml-4 rounded-full text-center text-uppercase text-2xl"
+          class="bg-gradient-to-r from-gray-700 to-gray-900 text-stone-50 h-12 ml-4 rounded-full text-center text-uppercase text-2xl"
         >
           Send
         </button>
       </div>
     </div>
   </div>
+  <PopupModal
+    v-if="isModal"
+    @closeModal="isModal = false"
+    :header="'Additional confirmation required'"
+    :body="'Are you sure you want to delete this conversation?'"
+  />
 </template>
 
 <script>
 import useUserStore from "@/stores/user";
 import ChatMessage from "@/components/ChatMessage.vue";
+import CloseButton from "@/components/CloseButton.vue";
+import PopupModal from "@/components/PopupModal.vue";
 import { mapState } from "pinia";
 
 export default {
   name: "Conversation",
   components: {
     ChatMessage,
+    CloseButton,
+    PopupModal,
   },
   props: ["id"],
   data() {
@@ -71,6 +82,7 @@ export default {
       messages: [],
       talkerUsername: "",
       talkerAvatar: "",
+      isModal: false,
     };
   },
   computed: {
@@ -110,7 +122,7 @@ export default {
       this.message = "";
     },
     scrollToBottom() {
-      const objDiv = document.getElementById("container");
+      const objDiv = this.$refs.scrollToMe;
       objDiv.scrollTop = objDiv.scrollHeight;
     },
   },
@@ -165,9 +177,11 @@ export default {
   }
   &__message-creator {
     padding: 0 2rem;
+    display: flex;
     input {
       padding: 0 2rem;
       transition: all 0.3s ease-in;
+      width: 100%;
       &:focus {
         outline: none;
         transform: scale(1.01);
@@ -175,6 +189,7 @@ export default {
     }
     button {
       transition: all 0.3s ease-in;
+      width: 10rem;
       &:hover {
         transform: scale(1.02);
       }
