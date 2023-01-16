@@ -153,6 +153,10 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
             return None
 
     @database_sync_to_async
+    def delete_conversation(self, conversation):
+        conversation.delete()
+
+    @database_sync_to_async
     def is_conversation_user(self, conversation, user):
         if user in conversation.users.all():
             return True
@@ -201,6 +205,8 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
         # await self.delete_search_query(self.scope['user'])
         # self.channel_layer.group_discard(self.room_group_name,
         #                                  self.channel_name)
+        self.channel_layer.group_discard(self.room_group_name,
+                                         self.channel_name)
         await self.close()
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
@@ -217,6 +223,11 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
                     'status': 'close'
                 }
             )
+            await self.delete_conversation(conversation)
+            self.channel_layer.group_discard(self.room_group_name,
+                                             self.channel_name)
+            await self.close()
+
         else:
             message = await self.save_message(user, conversation, message)
 
