@@ -1,6 +1,9 @@
 <template>
   <button
-    @click.prevent="this.$emit('userChoice', $event, isAccept)"
+    @click.prevent="
+      this.$emit('userChoice', $event, isAccept);
+      color = isAccept ? 'red' : 'black';
+    "
     class="h-12 w-12 place-content-center grid rounded-md"
     :class="[isAccept ? 'ml-4' : 'mr-4']"
   >
@@ -9,7 +12,7 @@
       xmlns="http://www.w3.org/2000/svg"
       width="3em"
       height="3em"
-      fill="white"
+      :fill="color"
       class="bi bi-heart-fill"
       viewBox="0 0 16 16"
     >
@@ -23,7 +26,7 @@
       xmlns="http://www.w3.org/2000/svg"
       width="3em"
       height="3em"
-      fill="white"
+      :fill="color"
       class="bi bi-heartbreak-fill"
       viewBox="0 0 16 16"
     >
@@ -38,5 +41,10 @@
 export default {
   name: "DeciderButton",
   props: ["isAccept"],
+  data() {
+    return {
+      color: "white",
+    };
+  },
 };
 </script>

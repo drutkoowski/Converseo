@@ -52,11 +52,14 @@ class QueueConsumer(GenericAsyncAPIConsumer):
         if match.accepted_by.all().count() == 2:
             match.delete()
             return True
+        elif match.declined_by.all().count() == 2:
+            match.delete()
+            return None
         elif match.declined_by.all().count() > 0:
             match.delete()
             return False
         else:
-            return False
+            return None
 
     @database_sync_to_async
     def get_random_talker(self, user):
@@ -146,11 +149,11 @@ class QueueConsumer(GenericAsyncAPIConsumer):
         match = await self.get_match(match_id)
         talker = await self.get_user_by_id(talker_id)
         if match is None:
-            is_accepted = None
+            is_accepted = False
         else:
             await self.save_user_choice(match, choice, user)
             is_accepted = await self.check_acceptance(match)
-        if is_accepted:
+        if is_accepted is True:
             is_talked_already = await self.check_talked_already(user, talker)
             if is_talked_already is None:
                 conversation = await self.create_conversation_room(user, talker)
@@ -174,16 +177,26 @@ class QueueConsumer(GenericAsyncAPIConsumer):
                     'subject': 'matched'
                 }
             )
-            return
-        if is_accepted is None:
-            await self.channel_layer.group_send(
-                "{}".format(user.username),
-                {
-                    'type': 'send_message',
-                    'random_talker': AccountSerializer(instance=user).data,
-                    'subject': 'declined'
-                }
-            )
+        if is_accepted is False:
+            if choice is True:
+                await self.channel_layer.group_send(
+                    "{}".format(user.username),
+                    {
+                        'type': 'send_message',
+                        'random_talker': AccountSerializer(instance=user).data,
+                        'subject': 'declined'
+                    }
+                )
+            elif choice is False:
+                await self.channel_layer.group_send(
+                    "{}".format(talker.username),
+                    {
+                        'type': 'send_message',
+                        'random_talker': AccountSerializer(instance=user).data,
+                        'subject': 'declined'
+                    }
+                )
+                await self.disconnect(code=1000)
 
     async def send_message(self, event):
         # Receive message from room group
