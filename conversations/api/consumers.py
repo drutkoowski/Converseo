@@ -4,7 +4,7 @@ from django.db.models.functions import Now
 from accounts.api.serializers import AccountSerializer
 from accounts.models import Account
 from conversations.api.serializers import QueueSerializer, ConversationSerializer, MessageSerializer
-from conversations.models import Conversation, SearchQueue, Message
+from conversations.models import Conversation, SearchQueue, Message, Match
 from djangochannelsrestframework.generics import GenericAsyncAPIConsumer
 from djangochannelsrestframework import permissions
 import json
@@ -15,8 +15,50 @@ class QueueConsumer(GenericAsyncAPIConsumer):
     permission_classes = (permissions.AllowAny,)
 
     @database_sync_to_async
+    def get_user_by_id(self, pk):
+        return Account.objects.get(pk=pk)
+
+    @database_sync_to_async
     def create_search_queue(self, user):
-        return SearchQueue.objects.create(user=user).save()
+        sq = SearchQueue.objects.create(user=user)
+        sq.save()
+        return sq
+
+    @database_sync_to_async
+    def create_match(self, user, talker):
+        match = Match.objects.create()
+        match.users.add(talker)
+        match.users.add(user)
+        match.save()
+        return match
+
+    @database_sync_to_async
+    def get_match(self, match_id):
+        try:
+            return Match.objects.get(pk=match_id)
+        except:
+            return None
+
+    @database_sync_to_async
+    def save_user_choice(self, match, choice, user):
+        if choice:
+            match.accepted_by.add(user)
+        else:
+            match.declined_by.add(user)
+        match.save()
+
+    @database_sync_to_async
+    def check_acceptance(self, match):
+        if match:
+            if match.accepted_by.all().count() == 2:
+                match.delete()
+                return True
+            if match.declined_by.all().count() > 0:
+                match.delete()
+                return False
+            else:
+                return None
+
 
     @database_sync_to_async
     def get_random_talker(self, user):
@@ -69,17 +111,19 @@ class QueueConsumer(GenericAsyncAPIConsumer):
             await self.create_search_queue(user)
             random_talker = await self.get_random_talker(user)
             if random_talker is not None:
-                is_talked_already = await self.check_talked_already(user, random_talker)
-                if is_talked_already is None:
-                    conversation = await self.create_conversation_room(user, random_talker)
-                else:
-                    conversation = is_talked_already
+                # is_talked_already = await self.check_talked_already(user, random_talker)
+                # if is_talked_already is None:
+                #     conversation = await self.create_conversation_room(user, random_talker)
+                # else:
+                #     conversation = is_talked_already
+                match = await self.create_match(user, random_talker)
                 await self.channel_layer.group_send(
                     "{}".format(random_talker.username),
                     {
                         'type': 'send_message',
                         'random_talker': AccountSerializer(instance=user).data,
-                        'room_id': conversation.pk,
+                        'matchId': match.pk,
+                        'talkerId': user.pk,
                         'subject': 'found'
                     }
                 )
@@ -88,25 +132,64 @@ class QueueConsumer(GenericAsyncAPIConsumer):
                     {
                         'type': 'send_message',
                         'random_talker': AccountSerializer(instance=random_talker).data,
-                        'room_id': conversation.pk,
+                        'matchId': match.pk,
+                        'talkerId': random_talker.pk,
                         'subject': 'found'
                     }
                 )
-                await self.channel_layer.group_discard(
-                    "{}".format(user.username),
-                    self.channel_name
-                )
-                await self.channel_layer.group_discard(
-                    "{}".format(random_talker.username),
-                    self.channel_name
-                )
 
     async def disconnect(self, code):
-        # user = await self.get_user(self.scope["url_route"]["kwargs"]["username"])
         await self.delete_search_query(self.scope['user'])
         self.channel_layer.group_discard(self.room_group_name,
                                          self.channel_name)
         await self.close()
+
+    async def receive(self, text_data=None, bytes_data=None, **kwargs):
+        data = json.loads(text_data)
+        choice = data['choice']
+        match_id = data['matchId']
+        talker_id = data['talkerId']
+        user = self.scope['user']
+        match = await self.get_match(match_id)
+        talker = await self.get_user_by_id(talker_id)
+        await self.save_user_choice(match, choice, user)
+        is_accepted = await self.check_acceptance(match)
+        print('DECYZJA', is_accepted)
+        print('talker', talker.username)
+        print('JA', user.username)
+        if is_accepted:
+            is_talked_already = await self.check_talked_already(user, talker)
+            if is_talked_already is None:
+                conversation = await self.create_conversation_room(user, talker)
+            else:
+                conversation = is_talked_already
+            await self.channel_layer.group_send(
+                "{}".format(talker.username),
+                {
+                    'type': 'send_message',
+                    'random_talker': AccountSerializer(instance=user).data,
+                    'room_id': conversation.pk,
+                    'subject': 'matched'
+                }
+            )
+            await self.channel_layer.group_send(
+                "{}".format(user.username),
+                {
+                    'type': 'send_message',
+                    'random_talker': AccountSerializer(instance=talker).data,
+                    'room_id': conversation.pk,
+                    'subject': 'matched'
+                }
+            )
+        if is_accepted is False:
+            await self.channel_layer.group_send(
+                "{}".format(talker.username),
+                {
+                    'type': 'send_message',
+                    'random_talker': AccountSerializer(instance=user).data,
+                    'subject': 'declined'
+                }
+            )
 
     async def send_message(self, event):
         # Receive message from room group

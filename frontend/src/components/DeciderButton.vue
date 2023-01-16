@@ -1,5 +1,6 @@
 <template>
   <button
+    @click.prevent="this.$emit('userChoice', $event, isAccept)"
     class="h-12 w-12 place-content-center grid rounded-md"
     :class="[isAccept ? 'ml-4' : 'mr-4']"
   >

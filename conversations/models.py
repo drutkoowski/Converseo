@@ -32,3 +32,11 @@ class SearchQueue(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=get_current_date)
     expires_at = models.DateTimeField(default=get_expire_date)
+
+
+class Match(models.Model):
+    users = models.ManyToManyField(Account)
+    created_at = models.DateTimeField(default=get_current_date)
+    expires_at = models.DateTimeField(default=get_expire_date)
+    accepted_by = models.ManyToManyField(Account, blank=True, null=True, related_name='accepted')
+    declined_by = models.ManyToManyField(Account, blank=True, null=True, related_name='declined')

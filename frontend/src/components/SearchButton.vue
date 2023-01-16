@@ -58,21 +58,23 @@
       {{ lowerSearchMsg }}
     </h3>
     <div class="flex mt-4" v-if="isTalkerFound">
-      <DeciderButton :is-accept="false" />
-      <DeciderButton :is-accept="true" />
+      <DeciderButton :is-accept="false" @userChoice="sendChoice" />
+      <DeciderButton :is-accept="true" @userChoice="sendChoice" />
     </div>
   </div>
+  <PopupSVG />
 </template>
 
 <script>
-// import axios from "axios";
 import DeciderButton from "./DeciderButton.vue";
+import PopupSVG from "./PopupSVG.vue";
 import useUserStore from "@/stores/user";
 
 export default {
   name: "SearchButton",
   components: {
     DeciderButton,
+    PopupSVG,
   },
   data() {
     return {
@@ -80,7 +82,10 @@ export default {
       isTalkerFound: false,
       talkerUsername: "",
       talkerAvatarPath: "",
+      matchId: "",
+      talkerId: "",
       lowerSearchMsg: "Search Converseo",
+      ws: "",
     };
   },
   methods: {
@@ -89,15 +94,19 @@ export default {
       this.isTalkerFound = false;
       this.talkerUsername = "";
       this.talkerAvatarPath = "";
+      this.matchId = "";
+      this.queueId = "";
       this.lowerSearchMsg = this.isSearching
         ? "Searching..."
         : "Search Converseo";
     },
-    fillSearchInfo(username, avatarPath) {
+    fillSearchInfo(username, avatarPath, matchId, talkerId) {
       this.isSearching = !this.isSearching;
       this.isTalkerFound = true;
       this.talkerUsername = username;
       this.talkerAvatarPath = avatarPath;
+      this.matchId = matchId;
+      this.talkerId = talkerId;
       this.lowerSearchMsg = "You found someone!";
     },
     async toggleSearch() {
@@ -109,28 +118,60 @@ export default {
       const ws = new WebSocket(
         `ws://127.0.0.1:8000/ws/queue/?token=${userStore.access}`
       );
+      this.ws = ws;
       if (this.isSearching) {
         const ref = this;
-        const router = this.$router;
         ws.onmessage = function (e) {
           const data = JSON.parse(e.data);
+          const matchId = data.random_talker.matchId;
+          const talkerId = data.random_talker.talkerId;
           const randomTalker = data.random_talker.random_talker;
-          const roomId = data.random_talker.room_id;
           const subject = data.random_talker.subject;
           if (subject === "found") {
-            ref.fillSearchInfo(randomTalker.username, randomTalker.avatar);
-            ws.close(1000);
-            setTimeout(function () {
-              router.push({
-                name: "conversation",
-                params: { conversation_id: roomId },
-              });
-            }, 2000);
+            ref.fillSearchInfo(
+              randomTalker.username,
+              randomTalker.avatar,
+              matchId,
+              talkerId
+            );
           }
         };
       } else {
         ws.close(1000);
       }
+    },
+    async sendChoice(evt, choice) {
+      const userStore = useUserStore();
+      const router = this.$router;
+      const ref = this;
+      await ref.ws.send(
+        JSON.stringify({
+          choice: choice,
+          matchId: this.matchId,
+          talkerId: this.talkerId,
+          token: userStore.access,
+        })
+      );
+      if (choice === false) {
+        this.isSearching = true;
+        this.clearSearch();
+      }
+      ref.ws.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        console.log(data);
+        const subject = data.random_talker.subject;
+        const roomId = data.random_talker.room_id;
+        console.log(subject);
+        if (subject === "matched") {
+          ref.ws.close(1000);
+          router.push({
+            name: "conversation",
+            params: { conversation_id: roomId },
+          });
+        } else if (subject === "declined") {
+          console.log("Talker declined!");
+        }
+      };
     },
   },
 };
