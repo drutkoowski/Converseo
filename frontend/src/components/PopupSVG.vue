@@ -23,6 +23,11 @@
 <script>
 export default {
   name: "PopupModal",
+  created() {
+    setTimeout(() => {
+      this.$emit("animationEnd");
+    }, 2000);
+  },
 };
 </script>
 
@@ -36,20 +41,26 @@ export default {
   0% {
     width: 30rem;
   }
-  20% {
+  10% {
     transform: scale(0.95) rotate(0.25turn);
   }
-  40% {
+  30% {
     transform: scale(0.85) rotate(0.5turn);
   }
-  60% {
-    transform: scale(0.75) rotate(0.75turn);
+  50% {
+    transform: scale(0.65) rotate(0.75turn);
   }
-  80% {
-    transform: scale(0.65) rotate(1turn);
+  60% {
+    transform: scale(0.55) rotate(1turn);
+  }
+  75% {
+    transform: scale(0.45) rotate(1.25turn);
+  }
+  90% {
+    transform: scale(0.35) rotate(1.5turn);
   }
   100% {
-    transform: scale(0.55) rotate(1.25turn);
+    transform: scale(0.25) rotate(1.75turn);
   }
 }
 
@@ -60,7 +71,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.9);
   display: table;
   transition: opacity 0.3s ease;
   &-white {

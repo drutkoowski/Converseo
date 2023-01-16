@@ -16,6 +16,7 @@ export default {
 <style>
 .close-btn {
   cursor: pointer;
-  width: 20px;
+  width: 2rem;
+  transform: scale(1.35);
 }
 </style>

@@ -62,7 +62,7 @@
       <DeciderButton :is-accept="true" @userChoice="sendChoice" />
     </div>
   </div>
-  <PopupSVG />
+  <PopupSVG v-if="isDeclined" @animationEnd="isDeclined = false" />
 </template>
 
 <script>
@@ -86,6 +86,7 @@ export default {
       talkerId: "",
       lowerSearchMsg: "Search Converseo",
       ws: "",
+      isDeclined: false,
     };
   },
   methods: {
@@ -158,10 +159,8 @@ export default {
       }
       ref.ws.onmessage = function (e) {
         const data = JSON.parse(e.data);
-        console.log(data);
         const subject = data.random_talker.subject;
         const roomId = data.random_talker.room_id;
-        console.log(subject);
         if (subject === "matched") {
           ref.ws.close(1000);
           router.push({
@@ -169,7 +168,9 @@ export default {
             params: { conversation_id: roomId },
           });
         } else if (subject === "declined") {
-          console.log("Talker declined!");
+          ref.isSearching = true;
+          ref.clearSearch();
+          ref.isDeclined = true;
         }
       };
     },

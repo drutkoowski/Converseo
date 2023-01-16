@@ -49,16 +49,14 @@ class QueueConsumer(GenericAsyncAPIConsumer):
 
     @database_sync_to_async
     def check_acceptance(self, match):
-        if match:
-            if match.accepted_by.all().count() == 2:
-                match.delete()
-                return True
-            if match.declined_by.all().count() > 0:
-                match.delete()
-                return False
-            else:
-                return None
-
+        if match.accepted_by.all().count() == 2:
+            match.delete()
+            return True
+        elif match.declined_by.all().count() > 0:
+            match.delete()
+            return False
+        else:
+            return False
 
     @database_sync_to_async
     def get_random_talker(self, user):
@@ -111,11 +109,6 @@ class QueueConsumer(GenericAsyncAPIConsumer):
             await self.create_search_queue(user)
             random_talker = await self.get_random_talker(user)
             if random_talker is not None:
-                # is_talked_already = await self.check_talked_already(user, random_talker)
-                # if is_talked_already is None:
-                #     conversation = await self.create_conversation_room(user, random_talker)
-                # else:
-                #     conversation = is_talked_already
                 match = await self.create_match(user, random_talker)
                 await self.channel_layer.group_send(
                     "{}".format(random_talker.username),
@@ -152,11 +145,11 @@ class QueueConsumer(GenericAsyncAPIConsumer):
         user = self.scope['user']
         match = await self.get_match(match_id)
         talker = await self.get_user_by_id(talker_id)
-        await self.save_user_choice(match, choice, user)
-        is_accepted = await self.check_acceptance(match)
-        print('DECYZJA', is_accepted)
-        print('talker', talker.username)
-        print('JA', user.username)
+        if match is None:
+            is_accepted = None
+        else:
+            await self.save_user_choice(match, choice, user)
+            is_accepted = await self.check_acceptance(match)
         if is_accepted:
             is_talked_already = await self.check_talked_already(user, talker)
             if is_talked_already is None:
@@ -181,9 +174,10 @@ class QueueConsumer(GenericAsyncAPIConsumer):
                     'subject': 'matched'
                 }
             )
-        if is_accepted is False:
+            return
+        if is_accepted is None:
             await self.channel_layer.group_send(
-                "{}".format(talker.username),
+                "{}".format(user.username),
                 {
                     'type': 'send_message',
                     'random_talker': AccountSerializer(instance=user).data,

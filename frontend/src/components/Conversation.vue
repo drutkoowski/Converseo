@@ -1,9 +1,9 @@
 <template>
   <div class="grid-container">
     <div class="card bg-gradient-to-br from-orange-200 to-red-300">
-      <div class="card__user-header mt-10 ml-4">
+      <div class="card__user-header mt-5">
         <img
-          class="rounded-full outline outline-pink-500 outline-offset-0.5 transition-all hover:-translate-y-0.5 hover:scale-105 w-20 h-20"
+          class="rounded-full outline outline-pink-500 outline-offset-0.5 transition-all hover:-translate-y-0.5 hover:scale-105 w-20 h-20 ml-4"
           :src="talkerAvatar"
           alt=""
         />
@@ -14,7 +14,6 @@
         </h1>
         <CloseButton class="mr-5" @openModal="isModal = true" />
       </div>
-      <hr class="mt-4" />
       <div class="card__message-container mb-2" ref="scrollToMe">
         <div
           v-if="messages.length === 0"
@@ -186,20 +185,22 @@ export default {
   grid-template-columns: 0.25fr 1fr 0.25fr;
   justify-content: center;
   align-content: center;
-  margin-top: 6rem;
+  margin-top: 3rem;
   height: 75vh;
 }
 .card {
-  height: 85%;
   border-radius: 20px;
   grid-column: 2/3;
   grid-row: 1/2;
-  hr {
-    border-top-width: 3px;
-  }
+  display: grid;
+  grid-template-rows: 0.5fr 2fr 0.35fr;
+  grid-template-columns: 1fr;
   &__user-header {
     display: flex;
     align-items: center;
+    grid-row: 1/2;
+    grid-column: 1/2;
+    border-bottom: 3px solid #ffffff;
   }
 
   &__message-container::-webkit-scrollbar {
@@ -217,9 +218,11 @@ export default {
   }
   &__message-container {
     padding: 2rem 2rem;
-    height: 65%;
+    height: 95%;
     max-height: 25rem;
     overflow-y: auto;
+    grid-row: 2/3;
+    grid-column: 1/2;
   }
   &__message-creator {
     padding: 0 2rem;
