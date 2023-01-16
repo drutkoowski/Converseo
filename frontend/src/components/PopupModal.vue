@@ -1,6 +1,10 @@
 <template>
   <transition name="fade" mode="out-in">
-    <div class="modal-mask" @click="this.$emit('closeModal')">
+    <div
+      class="modal-mask"
+      @click="this.$emit('closeModal')"
+      :class="{ 'modal-mask-white': bgWhite }"
+    >
       <div class="modal-wrapper">
         <div
           class="modal-container bg-gradient-to-r from-gray-700 to-gray-900 text-stone-50"
@@ -18,8 +22,9 @@
             <slot name="footer">
               <button
                 class="modal-default-button mb-4 w-24 rounded-full transition-all bg-gradient-to-r hover:scale-105 from-orange-200 to-red-600 cursor-pointer"
+                @click.prevent="this.$emit('closeConversation')"
               >
-                OK
+                {{ btnMsg }}
               </button>
             </slot>
           </div>
@@ -33,7 +38,7 @@
 import CloseButton from "./CloseButton.vue";
 export default {
   name: "PopupModal",
-  props: ["header", "body"],
+  props: ["header", "body", "bgWhite", "btnMsg"],
   components: { CloseButton },
   created() {
     document.onkeydown = (evt) => {
@@ -46,7 +51,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -57,6 +62,9 @@ export default {
   background-color: rgba(0, 0, 0, 0.5);
   display: table;
   transition: opacity 0.3s ease;
+  &-white {
+    background-color: rgba(235, 235, 235, 1) !important;
+  }
 }
 
 .modal-wrapper {

@@ -1,6 +1,3 @@
-import json
-
-from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.db.models import Q
 from django.db.models.functions import Now
@@ -9,8 +6,6 @@ from accounts.models import Account
 from conversations.api.serializers import QueueSerializer, ConversationSerializer, MessageSerializer
 from conversations.models import Conversation, SearchQueue, Message
 from djangochannelsrestframework.generics import GenericAsyncAPIConsumer
-from djangochannelsrestframework.mixins import ListModelMixin
-from djangochannelsrestframework.observer import model_observer
 from djangochannelsrestframework import permissions
 import json
 
@@ -18,10 +13,6 @@ import json
 class QueueConsumer(GenericAsyncAPIConsumer):
     serializer_class = QueueSerializer
     permission_classes = (permissions.AllowAny,)
-
-    # @database_sync_to_async
-    # def get_user(self, username):
-    #     return Account.objects.get(username=username)
 
     @database_sync_to_async
     def create_search_queue(self, user):
@@ -54,6 +45,14 @@ class QueueConsumer(GenericAsyncAPIConsumer):
         conversation.save()
         return conversation
 
+    @database_sync_to_async
+    def check_talked_already(self, user, talker):
+        conversation = Conversation.objects.filter(users=user).filter(users=talker).first()
+        if conversation:
+            return conversation
+        else:
+            return None
+
     # jesli jakis nowy user sie polaczy z systemem, subskrybuje model change
     async def connect(self, **kwargs):
         # await self.channel_layer.group_add() // lub group_discard dla disconnect
@@ -66,12 +65,15 @@ class QueueConsumer(GenericAsyncAPIConsumer):
                 self.room_group_name,
                 self.channel_name
             )
-
             #
             await self.create_search_queue(user)
             random_talker = await self.get_random_talker(user)
             if random_talker is not None:
-                conversation = await self.create_conversation_room(user, random_talker)
+                is_talked_already = await self.check_talked_already(user, random_talker)
+                if is_talked_already is None:
+                    conversation = await self.create_conversation_room(user, random_talker)
+                else:
+                    conversation = is_talked_already
                 await self.channel_layer.group_send(
                     "{}".format(random_talker.username),
                     {
@@ -89,6 +91,14 @@ class QueueConsumer(GenericAsyncAPIConsumer):
                         'room_id': conversation.pk,
                         'subject': 'found'
                     }
+                )
+                await self.channel_layer.group_discard(
+                    "{}".format(user.username),
+                    self.channel_name
+                )
+                await self.channel_layer.group_discard(
+                    "{}".format(random_talker.username),
+                    self.channel_name
                 )
 
     async def disconnect(self, code):
@@ -137,7 +147,10 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
 
     @database_sync_to_async
     def get_conversation(self, id):
-        return Conversation.objects.get(pk=id)
+        try:
+            return Conversation.objects.get(pk=id)
+        except:
+            return None
 
     @database_sync_to_async
     def is_conversation_user(self, conversation, user):
@@ -159,6 +172,11 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
     async def connect(self, **kwargs):
         conversation_id = self.scope["url_route"]["kwargs"]['id']
         conversation = await self.get_conversation(conversation_id)
+        if conversation is None:
+            await self.accept()
+            await self.send_json({'status': 'not found'})
+            await self.close()
+            return
         user_connecting = self.scope['user']
         is_participant = await self.is_conversation_user(conversation, user_connecting)
         if conversation is not None and is_participant:
@@ -171,7 +189,11 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
             talker = await self.get_talker_user(user_connecting, conversation)
             await self.accept()
             await self.send_json({'messages': messages, 'status': 'initial', 'talker': talker})
-
+        else:
+            await self.accept()
+            await self.send_json({'status': 'not found'})
+            await self.close()
+            return
         #
 
     async def disconnect(self, code):
@@ -183,21 +205,38 @@ class ConversationConsumer(GenericAsyncAPIConsumer):
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         data = json.loads(text_data)
-        print(data)
+        close = data['close']
         message = data['message']
         user = self.scope['user']
         conversation = await self.get_conversation(data['conversation_id'])
-        message = await self.save_message(user, conversation, message)
+        if close:
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'conversation_notification',
+                    'status': 'close'
+                }
+            )
+        else:
+            message = await self.save_message(user, conversation, message)
 
-        # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': MessageSerializer(instance=message).data,
-                'status': 'update'
-            }
-        )
+            # Send message to room group
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'chat_message',
+                    'message': MessageSerializer(instance=message).data,
+                    'status': 'update'
+                }
+            )
+
+    async def conversation_notification(self, event):
+        status = event['status']
+
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'status': status
+        }))
 
     async def chat_message(self, event):
         message = event['message']

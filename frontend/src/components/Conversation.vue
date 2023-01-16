@@ -55,10 +55,33 @@
   <PopupModal
     v-if="isModal"
     @closeModal="isModal = false"
+    @closeConversation="closeConversation"
+    @keyup.esc="isModal = false"
+    :btnMsg="'OK'"
     :header="'Additional confirmation required'"
     :body="'Are you sure you want to delete this conversation?'"
     tabindex="0"
-    @keyup.esc="isModal = false"
+  />
+  <PopupModal
+    v-if="isModalClosed"
+    @closeModal="this.$router.push({ name: 'dashboard' })"
+    @keyup.esc="this.$router.push({ name: 'dashboard' })"
+    :btnMsg="'OK'"
+    :header="'Unable to display conversation'"
+    :body="'The conversation was closed by one of the participants'"
+    tabindex="0"
+  />
+  <PopupModal
+    v-if="conversationNotFound"
+    @closeModal="
+      conversationNotFound = this.$router.push({ name: 'dashboard' })
+    "
+    @keyup.esc="conversationNotFound = this.$router.push({ name: 'dashboard' })"
+    :btnMsg="'Back'"
+    :bgWhite="true"
+    :header="'Unable to display conversation'"
+    :body="'The conversation you want to display, does not exist'"
+    tabindex="0"
   />
 </template>
 
@@ -85,6 +108,8 @@ export default {
       talkerUsername: "",
       talkerAvatar: "",
       isModal: false,
+      isModalClosed: false,
+      conversationNotFound: false,
     };
   },
   computed: {
@@ -109,13 +134,32 @@ export default {
       if (data.status === "update") {
         ref.messages.push(data.message);
       }
+      if (data.status === "close") {
+        ref.isModalClosed = true;
+      }
+      if (data.status === "not found") {
+        ref.conversationNotFound = true;
+      }
     };
   },
   methods: {
+    async closeConversation() {
+      const userStore = useUserStore();
+      await this.ws.send(
+        JSON.stringify({
+          close: true,
+          message: "",
+          conversation_id: this.id,
+          token: userStore.access,
+        })
+      );
+      this.$router.push({ name: "dashboard" });
+    },
     async sendMessage() {
       const userStore = useUserStore();
-      this.ws.send(
+      await this.ws.send(
         JSON.stringify({
+          close: false,
           message: this.message,
           conversation_id: this.id,
           token: userStore.access,
@@ -163,7 +207,7 @@ export default {
   }
 
   &__message-container::-webkit-scrollbar-track {
-    background: #f68566; /* color of the tracking area */
+    background: inherit; /* color of the tracking area */
   }
 
   &__message-container::-webkit-scrollbar-thumb {
