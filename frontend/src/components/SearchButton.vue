@@ -66,13 +66,13 @@
     v-if="isDeclined"
     @animationEnd="isDeclined = false"
     svgSrc="https://converseo.s3.eu-central-1.amazonaws.com/chat-declined.svg"
-    msg="'Declined'"
+    msg="Declined"
   />
   <PopupSVG
     v-if="isMatched"
     @animationEnd="isMatched = false"
     svgSrc="https://converseo.s3.eu-central-1.amazonaws.com/puzzle.svg"
-    msg="'Matched'"
+    msg="Matched"
   />
 </template>
 
