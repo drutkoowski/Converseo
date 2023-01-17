@@ -3,26 +3,27 @@
     <div class="modal-mask">
       <div class="modal-wrapper text-center">
         <div class="modal-wrapper__icon-container">
-          <object
-            class="modal-wrapper__icon-container__icon-animated mx-auto filter-red"
-            data="https://converseo.s3.eu-central-1.amazonaws.com/chat-declined.svg"
-            type="image/svg+xml"
-          ></object>
+          <AnimatedSVG :data="svgSrc" />
         </div>
 
         <h3
           class="text-6xl mt-5 text-stone-50 text-transparent bg-clip-text bg-gradient-to-br from-orange-200 to-red-600"
         >
-          Declined :(
+          {{ msg }}
         </h3>
       </div>
+      <!--      https://converseo.s3.eu-central-1.amazonaws.com/puzzle.svg-->
     </div>
   </transition>
 </template>
 
 <script>
+import AnimatedSVG from "./AnimatedSVG.vue";
+
 export default {
   name: "PopupModal",
+  props: ["svgSrc", "msg"],
+  components: { AnimatedSVG },
   created() {
     setTimeout(() => {
       this.$emit("animationEnd");
@@ -32,38 +33,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.filter-red {
-  filter: invert(25%) sepia(53%) saturate(4579%) hue-rotate(347deg)
-    brightness(112%) contrast(79%);
-}
-
-@keyframes spiral {
-  0% {
-    width: 30rem;
-  }
-  10% {
-    transform: scale(0.95) rotate(0.25turn);
-  }
-  30% {
-    transform: scale(0.85) rotate(0.5turn);
-  }
-  50% {
-    transform: scale(0.65) rotate(0.75turn);
-  }
-  60% {
-    transform: scale(0.55) rotate(1turn);
-  }
-  75% {
-    transform: scale(0.45) rotate(1.25turn);
-  }
-  90% {
-    transform: scale(0.35) rotate(1.5turn);
-  }
-  100% {
-    transform: scale(0.25) rotate(1.75turn);
-  }
-}
-
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -84,11 +53,6 @@ export default {
   vertical-align: middle;
   &__icon-container {
     height: 25rem;
-    &__icon-animated {
-      fill: red !important;
-      width: 20rem;
-      animation: spiral 2s normal linear;
-    }
   }
 }
 

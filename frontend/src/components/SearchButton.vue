@@ -62,7 +62,18 @@
       <DeciderButton :is-accept="true" @userChoice="sendChoice" />
     </div>
   </div>
-  <PopupSVG v-if="isDeclined" @animationEnd="isDeclined = false" />
+  <PopupSVG
+    v-if="isDeclined"
+    @animationEnd="isDeclined = false"
+    svgSrc="https://converseo.s3.eu-central-1.amazonaws.com/chat-declined.svg"
+    msg="'Declined'"
+  />
+  <PopupSVG
+    v-if="isMatched"
+    @animationEnd="isMatched = false"
+    svgSrc="https://converseo.s3.eu-central-1.amazonaws.com/puzzle.svg"
+    msg="'Matched'"
+  />
 </template>
 
 <script>
@@ -87,6 +98,7 @@ export default {
       lowerSearchMsg: "Search Converseo",
       ws: "",
       isDeclined: false,
+      isMatched: false,
     };
   },
   methods: {
@@ -135,6 +147,10 @@ export default {
               matchId,
               talkerId
             );
+          } else if (subject === "declined") {
+            ref.isSearching = true;
+            ref.clearSearch();
+            ref.isDeclined = true;
           }
         };
       } else {
@@ -162,11 +178,14 @@ export default {
         const subject = data.random_talker.subject;
         const roomId = data.random_talker.room_id;
         if (subject === "matched") {
+          ref.isMatched = true;
           ref.ws.close(1000);
-          router.push({
-            name: "conversation",
-            params: { conversation_id: roomId },
-          });
+          setTimeout(() => {
+            router.push({
+              name: "conversation",
+              params: { conversation_id: roomId },
+            });
+          }, 2000);
         } else if (subject === "declined") {
           ref.isSearching = true;
           ref.clearSearch();

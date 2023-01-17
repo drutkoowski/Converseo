@@ -48,3 +48,12 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+button {
+  transition: all 0.3s ease-in;
+  &:hover {
+    transform: scale(1.15);
+  }
+}
+</style>
