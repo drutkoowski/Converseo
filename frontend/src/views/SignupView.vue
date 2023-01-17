@@ -104,7 +104,9 @@ export default {
         this.errorMsg = "Something went wrong.";
         return;
       }
-      this.$router.push({ name: "login" });
+      this.$router.push({
+        name: "login",
+      });
     },
   },
 };

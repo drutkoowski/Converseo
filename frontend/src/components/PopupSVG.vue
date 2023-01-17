@@ -12,7 +12,6 @@
           {{ msg }}
         </h3>
       </div>
-      <!--      https://converseo.s3.eu-central-1.amazonaws.com/puzzle.svg-->
     </div>
   </transition>
 </template>

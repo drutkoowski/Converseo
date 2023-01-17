@@ -64,7 +64,8 @@
                   <span class="text-red-300 underline">browse</span>
                 </span>
                 <span class="font-medium text-red-500" v-else>
-                  Successfully Uploaded
+                  <span v-if="duringUpload">Uploading...</span>
+                  <span v-else>Successfully Uploaded</span>
                 </span>
               </span>
               <input
@@ -108,6 +109,7 @@ export default {
     return {
       is_dragover: false,
       isUploaded: false,
+      duringUpload: false,
       file: "",
     };
   },
@@ -124,14 +126,17 @@ export default {
         },
       };
       try {
+        this.duringUpload = true;
         const res = await axios.patch(
           `user/edit/${userStore.userId}`,
           payload,
           config
         );
         userStore.avatarPath = res.data.avatar;
+        this.duringUpload = false;
         this.$emit("closeModal");
       } catch (error) {
+        this.duringUpload = false;
         this.$emit("closeModal");
       }
     },
