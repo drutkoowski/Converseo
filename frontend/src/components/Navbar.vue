@@ -54,6 +54,7 @@ export default {
     const response = await axios.get("user/current");
     userStore.username = response.data.username;
     userStore.avatarPath = response.data.avatar;
+    userStore.userId = response.data.id;
   },
 };
 </script>

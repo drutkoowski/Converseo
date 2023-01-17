@@ -16,16 +16,23 @@
             @drag.prevent.stop=""
             @dragstart.prevent.stop=""
             @dragend.prevent.stop="is_dragover = false"
-            @dragover.prevent.stop="is_dragover = true"
-            @dragenter.prevent.stop="is_dragover = true"
+            @dragover.prevent.stop="
+              is_dragover = true;
+              isUploaded = true;
+            "
+            @dragenter.prevent.stop="
+              is_dragover = true;
+              isUploaded = true;
+            "
             @dragleave.prevent.stop="is_dragover = false"
-            @drop.prevent.stop="upload($event)"
+            @drop.prevent.stop="saveImage"
           >
             <label
               class="flex justify-center w-full h-64 px-4 transition rounded-md border-2 border-dashed appearance-none cursor-pointer hover:border-gray-400 focus:outline-none"
             >
               <span class="flex items-center space-x-2">
                 <svg
+                  v-if="!isUploaded"
                   xmlns="http://www.w3.org/2000/svg"
                   class="w-6 h-6 text-red-500"
                   fill="none"
@@ -39,7 +46,20 @@
                     d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                   />
                 </svg>
-                <span class="font-medium text-red-500" v-if="isUploaded">
+                <svg
+                  v-if="isUploaded"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-check-lg w-6 h-6 text-red-500"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"
+                  />
+                </svg>
+                <span class="font-medium text-red-500" v-if="!isUploaded">
                   Drop files to Attach, or
                   <span class="text-red-300 underline">browse</span>
                 </span>
@@ -51,7 +71,9 @@
                 type="file"
                 name="file_upload"
                 class="hidden"
-                @change="upload"
+                ref="fileUpload"
+                @change="isUploaded = true"
+                accept="image/png, image/jpeg"
               />
             </label>
           </div>
@@ -59,8 +81,9 @@
           <div class="modal-footer">
             <slot name="footer">
               <button
+                v-if="isUploaded"
                 class="modal-default-button mb-4 w-24 rounded-full transition-all bg-gradient-to-r hover:scale-105 from-orange-200 to-red-600 cursor-pointer"
-                @click.prevent="this.$emit('closeConversation')"
+                @click.prevent="upload"
               >
                 {{ btnMsg }}
               </button>
@@ -73,7 +96,9 @@
 </template>
 
 <script>
+import useUserStore from "@/stores/user";
 import CloseButton from "./CloseButton.vue";
+import axios from "axios";
 
 export default {
   name: "UploadPopup",
@@ -83,12 +108,37 @@ export default {
     return {
       is_dragover: false,
       isUploaded: false,
-      uploadFile: "",
+      file: "",
     };
   },
   methods: {
-    async upload(ev) {
-      console.log(ev);
+    async upload() {
+      const userStore = useUserStore();
+      const file = this.file ? this.file : this.$refs.fileUpload.files[0];
+      const payload = {
+        avatar: file,
+      };
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      try {
+        const res = await axios.patch(
+          `user/edit/${userStore.userId}`,
+          payload,
+          config
+        );
+        userStore.avatarPath = res.data.avatar;
+        this.$emit("closeModal");
+      } catch (error) {
+        this.$emit("closeModal");
+      }
+    },
+    saveImage($event) {
+      this.file = $event.dataTransfer
+        ? [...$event.dataTransfer.files][0]
+        : [...$event.target.files][0];
       this.isUploaded = true;
     },
   },

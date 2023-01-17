@@ -9,6 +9,7 @@ export default defineStore("user", {
     refresh: localStorage.getItem("refreshToken") || "",
     username: "",
     avatarPath: "",
+    userId: "",
     isAuthenticated:
       JSON.parse(localStorage.getItem("isAuthenticated")) || false,
   }),

@@ -34,21 +34,3 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ("email", "id", "username", "avatar")
 
-# class CreateQueueSerializer(serializers.ModelSerializer):
-#     user = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         model = SearchQueue
-#         fields = ("user",
-#                   "created_at", "expires_at")
-#
-#     def get_user(self, instance):
-#         request = self.context.get("request")
-#         user = Account.objects.get(pk=request.user.pk)
-#         return user.username
-#
-#     def create(self, validated_data):
-#         request = self.context.get("request")
-#         user = Account.objects.get(pk=request.user.pk)
-#         search_queue = SearchQueue.objects.create(user=user)
-#         return search_queue
