@@ -128,8 +128,9 @@ export default {
         ? "Searching..."
         : "Search Converseo";
       const userStore = useUserStore();
+      const originName = window.location.origin;
       const ws = new WebSocket(
-        `ws://127.0.0.1:8000/ws/queue/?token=${userStore.access}`
+        `ws://${originName}/ws/queue/?token=${userStore.access}`
       );
       this.ws = ws;
       if (this.isSearching) {
