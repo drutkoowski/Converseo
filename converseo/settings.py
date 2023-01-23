@@ -84,7 +84,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [('redis', 6379)],
         },
     },
 }
@@ -146,6 +146,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = (
 'http://localhost:5173',  # for localhost (Vue Default)
 'http://127.0.0.1:8000', # for network
+'http://localhost:81',
+'http://127.0.0.1:81',
 )
 
 REST_FRAMEWORK = {
@@ -175,14 +177,9 @@ AWS_S3_OBJECT_PARAMETERS = {
 
 }
 AWS_LOCATION = 'static'
-# STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
-# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_QUERYSTRING_AUTH = False
 AWS_HEADERS = {
     "Access-Control-Allow-Origin": "*",
 }
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 DEFAULT_FILE_STORAGE = "converseo.media_storages.MediaStorage"
-# STATICFILES_DIRS = [
-#     'static',
-# ]

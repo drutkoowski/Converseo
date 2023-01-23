@@ -1,0 +1,57 @@
+version: '3'
+
+volumes:
+  converseo_local_postgres_data: {}
+  converseo_local_postgres_data_backups: {}
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: converseo_local_django
+    container_name: converseo_local_django
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app:z
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    ports:
+      - "8000:8000"
+    command: /start
+
+
+  redis:
+    container_name: redis
+    image: redis:5
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: converseo_production_postgres
+    container_name: converseo_local_postgres
+    volumes:
+      - converseo_local_postgres_data:/var/lib/postgresql/data
+      - converseo_local_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.postgres
+
+  frontend:
+    container_name: converseo_frontend
+    restart: always
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: converseo_frontend_image
+    depends_on:
+      - django
+    volumes:
+      - ./frontend/nginx:/etc/nginx/conf.d
+    ports:
+      - 81:80

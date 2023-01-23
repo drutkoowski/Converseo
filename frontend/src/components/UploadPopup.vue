@@ -83,7 +83,7 @@
             <slot name="footer">
               <button
                 v-if="isUploaded"
-                class="modal-default-button mb-4 w-24 rounded-full transition-all bg-gradient-to-r hover:scale-105 from-orange-200 to-red-600 cursor-pointer"
+                class="modal-default-button mb-4 w-52 rounded-full transition-all bg-gradient-to-r hover:scale-105 from-orange-200 to-red-600 cursor-pointer"
                 @click.prevent="upload"
               >
                 {{ btnMsg }}
@@ -201,8 +201,7 @@ export default {
 }
 
 .modal-default-button {
-  float: right;
-  margin-bottom: 0.5rem;
+  margin: 0 auto 0.5rem auto;
 }
 
 .fade-enter-from {
@@ -225,6 +224,7 @@ export default {
 }
 
 .modal-footer {
-  margin-bottom: 3.5rem;
+  display: flex;
+  justify-content: center;
 }
 </style>
