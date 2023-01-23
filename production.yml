@@ -3,14 +3,13 @@ version: '3'
 volumes:
   production_postgres_data: {}
   production_postgres_data_backups: {}
-  production_traefik: {}
 
 services:
   django:
     build:
       context: .
       dockerfile: ./compose/production/django/Dockerfile
-    image: myproj_production_django
+    image: converseo_production_django
     depends_on:
       - postgres
       - redis
@@ -23,34 +22,30 @@ services:
     build:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
-    image: myproj_production_postgres
+    image: converseo_production_postgres
     volumes:
       - production_postgres_data:/var/lib/postgresql/data
       - production_postgres_data_backups:/backups
     env_file:
       - ./.envs/.production/.postgres
 
-  traefik:
+  redis:
+    container_name: redis
+    image: redis:5
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+
+  frontend:
+    container_name: converseo_production_frontend
+    restart: always
     build:
-      context: .
-      dockerfile: ./compose/production/traefik/Dockerfile
-    image: myproj_production_traefik
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: converseo_production_frontend_image
     depends_on:
       - django
     volumes:
-      - production_traefik:/etc/traefik/acme
+      - ./frontend/nginx:/etc/nginx/conf.d
     ports:
-      - "0.0.0.0:80:80"
-      - "0.0.0.0:443:443"
-
-  redis:
-    image: redis:6
-
-  awscli:
-    build:
-      context: .
-      dockerfile: ./compose/production/aws/Dockerfile
-    env_file:
-      - ./.envs/.production/.django
-    volumes:
-      - production_postgres_data_backups:/backups:z
+      - 81:80
