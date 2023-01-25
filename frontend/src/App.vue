@@ -11,15 +11,6 @@
 <script>
 export default {
   name: "App",
-  created() {
-    document.head.insertAdjacentHTML(
-      "beforeend",
-      " <meta\n" +
-        '    http-equiv="Content-Security-Policy"\n' +
-        '    content="upgrade-insecure-requests"\n' +
-        "  />"
-    );
-  },
 };
 </script>
 
