@@ -16,7 +16,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from conversations.api.routing import websocket_urlpatterns
 from converseo.middleware import JwtAuthMiddlewareStack
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'src.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'converseo.settings')
 
 application = ProtocolTypeRouter({
     'http': get_asgi_application(),
