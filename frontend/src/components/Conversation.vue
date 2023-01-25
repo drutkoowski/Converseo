@@ -125,7 +125,7 @@ export default {
   created() {
     const userStore = useUserStore();
     const ref = this;
-    const originName = window.location.origin;
+    const originName = "52.28.70.2";
     this.ws = new WebSocket(
       `ws://${originName}/ws/conversations/${this.id}/?token=${userStore.access}`
     );
