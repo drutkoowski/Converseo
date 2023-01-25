@@ -131,9 +131,8 @@ Or using Docker:
 Project is: :fire: COMPLETED :fire:
 
 ## Improvements to be done
-- Creating Meals/Workouts fitted suggestions
-- Save for later functionality
-- Mobile version of the application
+- Adjusting layout
+- Adding some better UX
 
 ## Contact
 Created by Damian Rutkowski - feel free to contact me!
