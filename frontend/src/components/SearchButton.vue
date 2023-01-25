@@ -128,7 +128,7 @@ export default {
         ? "Searching..."
         : "Search Converseo";
       const userStore = useUserStore();
-      const originName = "52.28.70.2";
+      const originName = "3.127.135.129";
       const ws = new WebSocket(
         `ws://${originName}/ws/queue/?token=${userStore.access}`
       );
