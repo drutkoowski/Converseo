@@ -30,17 +30,6 @@ services:
     ports:
       - 6379:6379
 
-  postgres:
-    build:
-      context: .
-      dockerfile: ./compose/production/postgres/Dockerfile
-    image: converseo_production_postgres
-    container_name: converseo_local_postgres
-    volumes:
-      - converseo_local_postgres_data:/var/lib/postgresql/data
-      - converseo_local_postgres_data_backups:/backups
-    env_file:
-      - ./.envs/.local/.postgres
 
   frontend:
     container_name: converseo_frontend
