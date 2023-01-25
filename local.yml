@@ -1,9 +1,5 @@
 version: '3'
 
-volumes:
-  converseo_local_postgres_data: {}
-  converseo_local_postgres_data_backups: {}
-
 services:
   django:
     build:
@@ -11,13 +7,10 @@ services:
       dockerfile: ./compose/local/django/Dockerfile
     image: converseo_local_django
     container_name: converseo_local_django
-    depends_on:
-      - postgres
     volumes:
       - .:/app:z
     env_file:
       - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
     ports:
       - "8000:8000"
     command: /start
