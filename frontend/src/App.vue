@@ -1,8 +1,4 @@
 <template>
-  <meta
-    http-equiv="Content-Security-Policy"
-    content="upgrade-insecure-requests"
-  />
   <router-view v-slot="{ Component, route }">
     <transition name="fade" mode="out-in">
       <div :key="route.name">
@@ -15,6 +11,15 @@
 <script>
 export default {
   name: "App",
+  created() {
+    document.head.insertAdjacentHTML(
+      "beforeend",
+      " <meta\n" +
+        '    http-equiv="Content-Security-Policy"\n' +
+        '    content="upgrade-insecure-requests"\n' +
+        "  />"
+    );
+  },
 };
 </script>
 
