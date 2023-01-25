@@ -125,8 +125,9 @@ export default {
   created() {
     const userStore = useUserStore();
     const ref = this;
+    const originName = "3.127.135.129";
     this.ws = new WebSocket(
-      `ws://127.0.0.1:8000/ws/conversations/${this.id}/?token=${userStore.access}`
+      `ws://${originName}/ws/conversations/${this.id}/?token=${userStore.access}`
     );
     this.ws.onmessage = function (e) {
       const data = JSON.parse(e.data);

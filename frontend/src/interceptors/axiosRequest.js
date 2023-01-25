@@ -1,7 +1,7 @@
 import axios from "axios";
 import tokenActions from "../includes/tokenActions";
 
-axios.defaults.baseURL = "http://127.0.0.1:8000/api/";
+axios.defaults.baseURL = "http://3.127.135.129" + "/api/";
 
 // request interceptor
 const axiosConfigRequest = axios.interceptors.request.use(
