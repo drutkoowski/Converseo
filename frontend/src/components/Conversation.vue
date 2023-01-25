@@ -40,6 +40,7 @@
 
         <div class="card__message-creator">
           <input
+            @keyup.enter.prevent="sendMessage"
             type="text"
             id="message"
             v-model="message"
@@ -125,7 +126,7 @@ export default {
   created() {
     const userStore = useUserStore();
     const ref = this;
-    const originName = "3.127.135.129";
+    const originName = window.location.origin;
     this.ws = new WebSocket(
       `ws://${originName}/ws/conversations/${this.id}/?token=${userStore.access}`
     );
@@ -161,16 +162,18 @@ export default {
       this.$router.push({ name: "dashboard" });
     },
     async sendMessage() {
-      const userStore = useUserStore();
-      await this.ws.send(
-        JSON.stringify({
-          close: false,
-          message: this.message,
-          conversation_id: this.id,
-          token: userStore.access,
-        })
-      );
-      this.message = "";
+      if (this.message.length > 0) {
+        const userStore = useUserStore();
+        await this.ws.send(
+          JSON.stringify({
+            close: false,
+            message: this.message,
+            conversation_id: this.id,
+            token: userStore.access,
+          })
+        );
+        this.message = "";
+      }
     },
     scrollToBottom() {
       const objDiv = this.$refs.scrollToMe;
