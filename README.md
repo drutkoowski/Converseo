@@ -3,7 +3,8 @@
   <img src="readme/dashboard_readme.png" alt="Converseo"/>
 </p>
 
-> <h2>Converseo is an web app allowing the users to communicate with each other and look for new acquaintances. Backend was made in Django Rest Framework (asgi,channels included) as an API for Frontend which contains Vite/Vue app, managing websocket connections and API Calls (axios).
+> <h2>Converseo is an web app allowing the users to communicate with each other and look for new acquaintances. <br>
+> Backend was made in Django Rest Framework (asgi,channels included) as an API for Frontend which contains Vite/Vue app, managing websocket connections and API Calls (axios).
 </h2> <br>
 
 Live demo <br>
